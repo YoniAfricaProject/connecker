@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Upload, X, Save, Loader2, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Upload, X, Save, Loader2, CheckCircle, ImagePlus, Camera } from 'lucide-react';
 import Link from 'next/link';
 import { Button, Input, Card } from '@connecker/ui';
-import { DAKAR_COMMUNES, OTHER_CITIES, PROPERTY_TYPE_OPTIONS } from '@connecker/ui';
+import { PROPERTY_TYPE_OPTIONS } from '@connecker/ui';
 import { useAuth } from '@/lib/auth-context';
 import { getSupabase } from '@/lib/supabase';
 
@@ -15,14 +15,21 @@ const FEATURE_OPTIONS = [
   'Fibre optique', 'Securite', 'Cuisine equipee', 'Titre foncier', 'Viabilise',
 ];
 
+interface UploadedImage {
+  file: File;
+  preview: string;
+  uploading: boolean;
+  url?: string;
+}
+
 export default function NewPropertyPage() {
   const router = useRouter();
   const { user } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const [newImageUrl, setNewImageUrl] = useState('');
+  const [images, setImages] = useState<UploadedImage[]>([]);
 
   const [form, setForm] = useState({
     title: '', description: '', property_type: 'apartment',
@@ -34,15 +41,54 @@ export default function NewPropertyPage() {
   const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm({ ...form, [field]: e.target.value });
 
-  const addImageUrl = () => {
-    if (newImageUrl && !imageUrls.includes(newImageUrl)) {
-      setImageUrls([...imageUrls, newImageUrl]);
-      setNewImageUrl('');
-    }
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const newImages = files.map(file => ({
+      file,
+      preview: URL.createObjectURL(file),
+      uploading: false,
+    }));
+    setImages(prev => [...prev, ...newImages]);
+    // Reset input so same file can be selected again
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const removeImage = (url: string) => {
-    setImageUrls(imageUrls.filter(u => u !== url));
+  const removeImage = (index: number) => {
+    setImages(prev => {
+      URL.revokeObjectURL(prev[index].preview);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const uploadImages = async (propertyId: string): Promise<string[]> => {
+    const supabase = getSupabase();
+    const urls: string[] = [];
+
+    for (let i = 0; i < images.length; i++) {
+      const img = images[i];
+      setImages(prev => prev.map((p, j) => j === i ? { ...p, uploading: true } : p));
+
+      const ext = img.file.name.split('.').pop() || 'jpg';
+      const path = `${propertyId}/${Date.now()}-${i}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('property-images')
+        .upload(path, img.file, { cacheControl: '3600', upsert: false });
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        continue;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('property-images')
+        .getPublicUrl(path);
+
+      urls.push(publicUrl);
+      setImages(prev => prev.map((p, j) => j === i ? { ...p, uploading: false, url: publicUrl } : p));
+    }
+
+    return urls;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -52,7 +98,7 @@ export default function NewPropertyPage() {
       setError('Veuillez remplir tous les champs obligatoires');
       return;
     }
-    if (imageUrls.length === 0) {
+    if (images.length === 0) {
       setError('Ajoutez au moins une photo');
       return;
     }
@@ -90,15 +136,19 @@ export default function NewPropertyPage() {
 
       if (propError) throw propError;
 
-      // Add images
-      const images = imageUrls.map((url, i) => ({
-        property_id: property.id,
-        url,
-        is_primary: i === 0,
-        sort_order: i,
-      }));
+      // Upload images to Supabase Storage
+      const uploadedUrls = await uploadImages(property.id);
 
-      await supabase.from('property_images').insert(images);
+      // Save image records
+      if (uploadedUrls.length > 0) {
+        const imageRecords = uploadedUrls.map((url, i) => ({
+          property_id: property.id,
+          url,
+          is_primary: i === 0,
+          sort_order: i,
+        }));
+        await supabase.from('property_images').insert(imageRecords);
+      }
 
       setSuccess(true);
     } catch (err: any) {
@@ -203,27 +253,73 @@ export default function NewPropertyPage() {
         {/* Photos */}
         <Card className="p-6 space-y-5">
           <h2 className="text-lg font-semibold text-slate-900">Photos *</h2>
-          <p className="text-sm text-slate-500">Ajoutez des URLs de photos de votre bien. La premiere sera la photo principale.</p>
+          <p className="text-sm text-slate-500">La premiere photo sera la photo principale de l&apos;annonce.</p>
 
-          <div className="flex gap-2">
-            <Input placeholder="https://exemple.com/photo.jpg" value={newImageUrl} onChange={(e) => setNewImageUrl(e.target.value)} className="flex-1" />
-            <Button type="button" variant="outline" onClick={addImageUrl}>Ajouter</Button>
-          </div>
+          {/* Hidden file input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleFileSelect}
+            className="hidden"
+          />
 
-          {imageUrls.length > 0 && (
+          {/* Upload zone */}
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full border-2 border-dashed border-slate-200 rounded-xl p-8 text-center hover:border-orange-400 hover:bg-orange-50/50 transition-all cursor-pointer group"
+          >
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-14 h-14 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Camera size={24} />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-slate-700">Cliquez pour ajouter des photos</p>
+                <p className="text-xs text-slate-400 mt-1">JPG, PNG - Max 5 Mo par photo</p>
+              </div>
+            </div>
+          </button>
+
+          {/* Image previews */}
+          {images.length > 0 && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {imageUrls.map((url, i) => (
-                <div key={url} className="relative group">
-                  <img src={url} alt={`Photo ${i + 1}`} className="w-full h-24 object-cover rounded-xl border border-slate-200" />
+              {images.map((img, i) => (
+                <div key={i} className="relative group rounded-xl overflow-hidden border border-slate-200">
+                  <img src={img.preview} alt={`Photo ${i + 1}`} className="w-full h-28 object-cover" />
                   {i === 0 && (
-                    <span className="absolute top-1 left-1 bg-orange-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">Principale</span>
+                    <span className="absolute top-2 left-2 bg-orange-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                      Principale
+                    </span>
                   )}
-                  <button type="button" onClick={() => removeImage(url)}
-                    className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  {img.uploading && (
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                      <Loader2 size={20} className="animate-spin text-white" />
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => removeImage(i)}
+                    className="absolute top-2 right-2 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
                     <X size={12} />
                   </button>
+                  <div className="absolute bottom-0 left-0 right-0 bg-black/40 text-white text-[10px] text-center py-0.5">
+                    {(img.file.size / 1024 / 1024).toFixed(1)} Mo
+                  </div>
                 </div>
               ))}
+
+              {/* Add more button */}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="h-28 border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center text-slate-400 hover:border-orange-400 hover:text-orange-500 transition-colors"
+              >
+                <ImagePlus size={24} />
+                <span className="text-xs mt-1">Ajouter</span>
+              </button>
             </div>
           )}
         </Card>
