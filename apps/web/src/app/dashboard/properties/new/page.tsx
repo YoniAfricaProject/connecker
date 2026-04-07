@@ -43,21 +43,52 @@ export default function NewPropertyPage() {
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const newImages = files.map(file => ({
-      file,
-      preview: URL.createObjectURL(file),
-      uploading: false,
-    }));
-    setImages(prev => [...prev, ...newImages]);
-    // Reset input so same file can be selected again
+    if (files.length === 0) return;
+
+    // Check for HEIC files
+    const heicFiles = files.filter(f =>
+      f.name.toLowerCase().endsWith('.heic') || f.name.toLowerCase().endsWith('.heif') ||
+      f.type === 'image/heic' || f.type === 'image/heif'
+    );
+    if (heicFiles.length > 0) {
+      setError('Les fichiers HEIC ne sont pas supportes. Sur votre iPhone, allez dans Reglages > Appareil photo > Formats > Le plus compatible. Ou convertissez vos photos en JPG avant de les uploader.');
+      return;
+    }
+
+    files.forEach(file => {
+      // Resize via canvas for optimal upload size
+      const img = new window.Image();
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const dataUrl = ev.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxSize = 1920;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxSize || h > maxSize) {
+            if (w > h) { h = (h / w) * maxSize; w = maxSize; }
+            else { w = (w / h) * maxSize; h = maxSize; }
+          }
+          canvas.width = w;
+          canvas.height = h;
+          canvas.getContext('2d')!.drawImage(img, 0, 0, w, h);
+          const optimizedUrl = canvas.toDataURL('image/jpeg', 0.85);
+          canvas.toBlob((blob) => {
+            const optimizedFile = new File([blob!], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' });
+            setImages(prev => [...prev, { file: optimizedFile, preview: optimizedUrl, uploading: false }]);
+          }, 'image/jpeg', 0.85);
+        };
+        img.src = dataUrl;
+      };
+      reader.readAsDataURL(file);
+    });
+
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const removeImage = (index: number) => {
-    setImages(prev => {
-      URL.revokeObjectURL(prev[index].preview);
-      return prev.filter((_, i) => i !== index);
-    });
+    setImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const uploadImages = async (propertyId: string): Promise<string[]> => {
@@ -129,7 +160,7 @@ export default function NewPropertyPage() {
           country: form.country,
           features: form.features,
           announcer_id: user.id,
-          status: 'published',
+          status: 'pending',
         })
         .select()
         .single();
@@ -259,7 +290,7 @@ export default function NewPropertyPage() {
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
             multiple
             onChange={handleFileSelect}
             className="hidden"
@@ -277,7 +308,7 @@ export default function NewPropertyPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-slate-700">Cliquez pour ajouter des photos</p>
-                <p className="text-xs text-slate-400 mt-1">JPG, PNG - Max 5 Mo par photo</p>
+                <p className="text-xs text-slate-400 mt-1">JPG, PNG, WebP - Max 5 Mo par photo (pas de HEIC)</p>
               </div>
             </div>
           </button>

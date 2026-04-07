@@ -1,35 +1,77 @@
-import { Building2, Users, MessageSquare, TrendingUp, AlertCircle, CheckCircle, Clock } from 'lucide-react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { Building2, Users, MessageSquare, TrendingUp, AlertCircle, CheckCircle, Clock, Eye, ArrowUpRight, Loader2 } from 'lucide-react';
 import { Card, Badge } from '@connecker/ui';
-
-const STATS = [
-  { label: 'Total annonces', value: '2,487', icon: Building2, change: '+142 ce mois', color: 'bg-orange-100 text-orange-600' },
-  { label: 'Utilisateurs', value: '8,934', icon: Users, change: '+456 ce mois', color: 'bg-blue-100 text-blue-600' },
-  { label: 'Leads generes', value: '1,243', icon: MessageSquare, change: '+89 cette semaine', color: 'bg-emerald-100 text-emerald-600' },
-  { label: 'Taux conversion', value: '12.4%', icon: TrendingUp, change: '+1.2%', color: 'bg-purple-100 text-purple-600' },
-];
-
-const PENDING = [
-  { id: '1', title: 'Terrain 500m2 a Saly', announcer: 'Ibrahima Fall', date: '2026-04-07', type: 'land' },
-  { id: '2', title: 'Villa standing Ngor', announcer: 'Agence Touba Immo', date: '2026-04-07', type: 'villa' },
-  { id: '3', title: 'Appartement T4 Mermoz', announcer: 'Fatou Sarr', date: '2026-04-06', type: 'apartment' },
-  { id: '4', title: 'Local commercial Plateau', announcer: 'SCI Dakar Invest', date: '2026-04-06', type: 'commercial' },
-];
+import { getSupabase } from '@/lib/supabase';
 
 export default function AdminDashboard() {
+  const [stats, setStats] = useState({ properties: 0, pending: 0, users: 0, leads: 0, newLeads: 0 });
+  const [recentProperties, setRecentProperties] = useState<any[]>([]);
+  const [recentLeads, setRecentLeads] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      const supabase = getSupabase();
+
+      const [
+        { count: properties },
+        { count: pending },
+        { count: users },
+        { count: leads },
+        { count: newLeads },
+        { data: recentProps },
+        { data: recentLds },
+      ] = await Promise.all([
+        supabase.from('properties').select('*', { count: 'exact', head: true }),
+        supabase.from('properties').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('users').select('*', { count: 'exact', head: true }),
+        supabase.from('leads').select('*', { count: 'exact', head: true }),
+        supabase.from('leads').select('*', { count: 'exact', head: true }).eq('status', 'new'),
+        supabase.from('properties').select('*, users!announcer_id(full_name)').order('created_at', { ascending: false }).limit(5),
+        supabase.from('leads').select('*, properties(title)').order('created_at', { ascending: false }).limit(5),
+      ]);
+
+      setStats({
+        properties: properties || 0,
+        pending: pending || 0,
+        users: users || 0,
+        leads: leads || 0,
+        newLeads: newLeads || 0,
+      });
+      setRecentProperties(recentProps || []);
+      setRecentLeads(recentLds || []);
+      setLoading(false);
+    }
+    load();
+  }, []);
+
+  if (loading) {
+    return <div className="flex justify-center py-20"><Loader2 size={32} className="animate-spin text-orange-500" /></div>;
+  }
+
+  const STATS = [
+    { label: 'Total annonces', value: stats.properties, icon: Building2, color: 'bg-orange-100 text-orange-600' },
+    { label: 'En attente', value: stats.pending, icon: AlertCircle, color: 'bg-amber-100 text-amber-600' },
+    { label: 'Utilisateurs', value: stats.users, icon: Users, color: 'bg-blue-100 text-blue-600' },
+    { label: 'Leads recus', value: stats.leads, icon: MessageSquare, color: 'bg-emerald-100 text-emerald-600' },
+  ];
+
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Administration</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
         <p className="text-slate-500 mt-1">Vue d&apos;ensemble de la plateforme</p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {STATS.map(({ label, value, icon: Icon, change, color }) => (
+        {STATS.map(({ label, value, icon: Icon, color }) => (
           <Card key={label} className="p-5">
             <div className="flex items-start justify-between">
               <div className={`w-10 h-10 rounded-xl ${color} flex items-center justify-center`}><Icon size={20} /></div>
-              <span className="text-xs text-emerald-600 font-medium bg-emerald-50 px-2 py-1 rounded-full">{change}</span>
             </div>
             <div className="mt-4">
               <div className="text-2xl font-bold text-slate-900">{value}</div>
@@ -39,59 +81,52 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* Pending moderation */}
-      <Card className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <AlertCircle size={20} className="text-amber-500" />
-            <h2 className="text-lg font-semibold text-slate-900">En attente de moderation</h2>
-            <Badge variant="new">{PENDING.length}</Badge>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent properties */}
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-slate-900">Dernieres annonces</h2>
+            <Link href="/properties" className="text-sm text-orange-600 hover:text-orange-700 flex items-center gap-1">
+              Voir tout <ArrowUpRight size={14} />
+            </Link>
           </div>
-        </div>
+          <div className="space-y-3">
+            {recentProperties.map((p: any) => (
+              <Link key={p.id} href={`/properties/${p.id}`}
+                className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors">
+                <div>
+                  <div className="font-medium text-slate-900 text-sm">{p.title}</div>
+                  <div className="text-xs text-slate-500">{p.users?.full_name} - {p.city}</div>
+                </div>
+                <Badge variant={p.status === 'published' ? 'sale' : p.status === 'pending' ? 'new' : 'default'}>
+                  {p.status === 'published' ? 'Active' : p.status === 'pending' ? 'En attente' : p.status === 'rejected' ? 'Rejetee' : p.status}
+                </Badge>
+              </Link>
+            ))}
+          </div>
+        </Card>
 
-        <div className="space-y-3">
-          {PENDING.map((item) => (
-            <div key={item.id} className="flex items-center justify-between p-4 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors">
-              <div>
-                <div className="font-medium text-slate-900 text-sm">{item.title}</div>
-                <div className="text-xs text-slate-500 mt-0.5">par {item.announcer} - {item.date}</div>
+        {/* Recent leads */}
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-slate-900">Derniers leads</h2>
+            <Link href="/leads" className="text-sm text-orange-600 hover:text-orange-700 flex items-center gap-1">
+              Voir tout <ArrowUpRight size={14} />
+            </Link>
+          </div>
+          <div className="space-y-3">
+            {recentLeads.map((l: any) => (
+              <div key={l.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50">
+                <div>
+                  <div className="font-medium text-slate-900 text-sm">{l.sender_name}</div>
+                  <div className="text-xs text-slate-500">{l.properties?.title}</div>
+                </div>
+                <div className="text-xs text-slate-400">{new Date(l.created_at).toLocaleDateString('fr-FR')}</div>
               </div>
-              <div className="flex gap-2">
-                <button className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-colors">
-                  <CheckCircle size={14} />Approuver
-                </button>
-                <button className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 transition-colors">
-                  <AlertCircle size={14} />Rejeter
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      {/* Recent activity */}
-      <Card className="p-6">
-        <h2 className="text-lg font-semibold text-slate-900 mb-6">Activite recente</h2>
-        <div className="space-y-4">
-          {[
-            { action: 'Nouvelle inscription', detail: 'Mamadou Ba (annonceur)', time: 'Il y a 12 min', icon: Users, color: 'text-blue-500' },
-            { action: 'Annonce publiee', detail: 'Villa 4 chambres - Almadies', time: 'Il y a 45 min', icon: CheckCircle, color: 'text-emerald-500' },
-            { action: 'Annonce en attente', detail: 'Terrain 300m2 - Thies', time: 'Il y a 1h', icon: Clock, color: 'text-amber-500' },
-            { action: 'Lead recu', detail: 'Contact pour Appart T3 Plateau', time: 'Il y a 2h', icon: MessageSquare, color: 'text-purple-500' },
-          ].map(({ action, detail, time, icon: Icon, color }, i) => (
-            <div key={i} className="flex items-center gap-4">
-              <div className={`w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center ${color}`}>
-                <Icon size={16} />
-              </div>
-              <div className="flex-1">
-                <div className="text-sm font-medium text-slate-900">{action}</div>
-                <div className="text-xs text-slate-500">{detail}</div>
-              </div>
-              <span className="text-xs text-slate-400">{time}</span>
-            </div>
-          ))}
-        </div>
-      </Card>
+            ))}
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }

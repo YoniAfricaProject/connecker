@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Test HEIC</title>
+<script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+</head>
+<body style="padding:40px;font-family:sans-serif">
+<h2>Test HEIC Upload</h2>
+<input type="file" id="fileInput" accept="image/*" multiple>
+<div id="status" style="margin:10px 0;color:blue;white-space:pre-wrap"></div>
+<div id="previews" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:20px"></div>
+<script>
+document.getElementById('fileInput').addEventListener('change', async function(e) {
+  const files = Array.from(e.target.files);
+  const status = document.getElementById('status');
+  const previews = document.getElementById('previews');
+  previews.innerHTML = '';
+  
+  for (const file of files) {
+    const isHeic = file.name.toLowerCase().match(/\.(heic|heif)$/) || file.type === 'image/heic' || file.type === 'image/heif' || file.type === '';
+    
+    status.textContent += '\n' + file.name + ' | type="' + file.type + '" | isHeic=' + !!isHeic + ' | size=' + (file.size/1024).toFixed(0) + 'KB';
+    
+    if (isHeic) {
+      status.textContent += '\nConverting...';
+      try {
+        var result = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.8 });
+        status.textContent += '\nResult type: ' + typeof result + ' | isArray: ' + Array.isArray(result) + ' | isBlob: ' + (result instanceof Blob);
+        
+        // Handle both single blob and array of blobs
+        var blob = Array.isArray(result) ? result[0] : result;
+        status.textContent += '\nBlob size: ' + blob.size + ' | Blob type: ' + blob.type;
+        
+        var url = URL.createObjectURL(blob);
+        status.textContent += '\nURL: ' + url;
+        
+        var img = document.createElement('img');
+        img.src = url;
+        img.style.cssText = 'width:200px;height:150px;object-fit:cover;border:3px solid green;border-radius:8px';
+        img.onerror = function() { status.textContent += '\nIMG LOAD ERROR for ' + file.name; };
+        img.onload = function() { status.textContent += '\nIMG LOADED OK for ' + file.name + ' (' + img.naturalWidth + 'x' + img.naturalHeight + ')'; };
+        previews.appendChild(img);
+      } catch(err) {
+        status.textContent += '\nERROR: ' + err.message + '\n' + err.stack;
+      }
+    } else {
+      var url = URL.createObjectURL(file);
+      var img = document.createElement('img');
+      img.src = url;
+      img.style.cssText = 'width:200px;height:150px;object-fit:cover;border:3px solid blue;border-radius:8px';
+      previews.appendChild(img);
+    }
+  }
+});
+</script>
+</body>
+</html>
