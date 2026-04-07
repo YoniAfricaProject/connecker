@@ -13,6 +13,7 @@ import { formatPrice, formatSurface } from '@connecker/ui';
 import { getSupabase } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth-context';
 import { toggleFavorite } from '@/lib/favorites';
+import { PropertyMap } from '@/components/property-map';
 import type { Property } from '@connecker/shared-types';
 
 export default function PropertyDetailPage() {
@@ -253,6 +254,22 @@ export default function PropertyDetailPage() {
                   {property.announcer.company_name && <div className="text-xs text-slate-500">{property.announcer.company_name}</div>}
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Map */}
+          {property.latitude && property.longitude && (
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900 mb-3">Localisation</h2>
+              <PropertyMap
+                latitude={property.latitude}
+                longitude={property.longitude}
+                title={property.title}
+                className="h-[300px] rounded-xl overflow-hidden border border-slate-200"
+              />
+              <p className="text-xs text-slate-400 mt-2">
+                {property.district ? `${property.district}, ` : ''}{property.city}
+              </p>
             </div>
           )}
 

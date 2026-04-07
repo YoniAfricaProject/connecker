@@ -60,8 +60,14 @@ export function Header() {
                     <span className="text-sm font-medium text-slate-700 max-w-[100px] truncate">{user.full_name}</span>
                   </button>
                   <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl border border-slate-200 shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                    <Link href="/favorites" className="flex items-center gap-2 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">
+                    <Link href="/dashboard/profile" className="flex items-center gap-2 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">
+                      <User size={14} /> Mon profil
+                    </Link>
+                    <Link href="/dashboard/favorites" className="flex items-center gap-2 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">
                       <Heart size={14} /> Mes favoris
+                    </Link>
+                    <Link href="/dashboard/properties" className="flex items-center gap-2 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">
+                      <LayoutDashboard size={14} /> Mes annonces
                     </Link>
                     <button onClick={signOut} className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left">
                       <LogOut size={14} /> Deconnexion
