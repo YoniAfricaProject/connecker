@@ -25,6 +25,18 @@ export default function PropertyDetailPage() {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+
+  // Pre-fill contact form with logged-in user info
+  useEffect(() => {
+    if (user) {
+      setContactForm(f => ({
+        ...f,
+        name: f.name || user.full_name || '',
+        email: f.email || user.email || '',
+        phone: f.phone || user.phone || '',
+      }));
+    }
+  }, [user]);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {

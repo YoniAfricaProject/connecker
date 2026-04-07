@@ -26,19 +26,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const supabase = getSupabase();
 
-    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        fetchProfile(session.user.id);
+        fetchOrCreateProfile(session.user);
       } else {
         setLoading(false);
       }
     });
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        fetchProfile(session.user.id);
+        fetchOrCreateProfile(session.user);
       } else {
         setUser(null);
         setLoading(false);
@@ -48,15 +46,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  async function fetchProfile(authId: string) {
+  async function fetchOrCreateProfile(authUser: any) {
     const supabase = getSupabase();
+
+    // Try to fetch existing profile
     const { data } = await supabase
       .from('users')
       .select('*')
-      .eq('auth_id', authId)
+      .eq('auth_id', authUser.id)
       .single();
 
-    setUser(data as AppUser | null);
+    if (data) {
+      setUser(data as AppUser);
+      setLoading(false);
+      return;
+    }
+
+    // No profile found - create one (since trigger is disabled)
+    const meta = authUser.user_metadata || {};
+    const { data: newUser, error } = await supabase
+      .from('users')
+      .upsert({
+        auth_id: authUser.id,
+        email: authUser.email,
+        full_name: meta.full_name || authUser.email?.split('@')[0] || 'Utilisateur',
+        phone: meta.phone || null,
+        role: ['user', 'announcer', 'admin'].includes(meta.role) ? meta.role : 'user',
+      }, { onConflict: 'email' })
+      .select()
+      .single();
+
+    if (newUser) {
+      setUser(newUser as AppUser);
+    }
     setLoading(false);
   }
 

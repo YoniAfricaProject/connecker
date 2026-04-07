@@ -1,12 +1,24 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Phone, Mail, MapPin, Clock, Send, Loader2, CheckCircle, MessageCircle } from 'lucide-react';
 import { Button, Input } from '@connecker/ui';
 import { getSupabase } from '@/lib/supabase';
+import { useAuth } from '@/lib/auth-context';
 
 export default function ContactPage() {
+  const { user } = useAuth();
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
+
+  useEffect(() => {
+    if (user) {
+      setForm(f => ({
+        ...f,
+        name: f.name || user.full_name || '',
+        email: f.email || user.email || '',
+      }));
+    }
+  }, [user]);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
@@ -49,8 +61,8 @@ export default function ContactPage() {
         {/* Contact Info */}
         <div className="space-y-6">
           {[
-            { icon: <Phone size={20} />, title: 'Telephone', content: '+221 XX XXX XX XX', sub: 'Lun-Ven 9h-18h' },
-            { icon: <Mail size={20} />, title: 'Email', content: 'contact@connecker.com', sub: 'Reponse sous 24h' },
+            { icon: <Phone size={20} />, title: 'Telephone', content: '+33 7 54 83 27 23', sub: 'Lun-Ven 9h-18h' },
+            { icon: <Mail size={20} />, title: 'Email', content: 'yoniservicesapp@gmail.com', sub: 'Reponse sous 24h' },
             { icon: <MapPin size={20} />, title: 'Adresse', content: 'Dakar, Senegal', sub: 'Sur rendez-vous' },
             { icon: <Clock size={20} />, title: 'Horaires', content: 'Lun - Ven : 9h - 18h', sub: 'Sam : 9h - 13h' },
           ].map(({ icon, title, content, sub }) => (
@@ -68,7 +80,7 @@ export default function ContactPage() {
 
           {/* WhatsApp */}
           <button
-            onClick={() => window.open('https://wa.me/221XXXXXXXXX?text=Bonjour%20Connec%27Ker', '_blank')}
+            onClick={() => window.open('https://wa.me/33754832723?text=Bonjour%20Connec%27Ker', '_blank')}
             className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-medium transition-colors"
           >
             <MessageCircle size={18} />
