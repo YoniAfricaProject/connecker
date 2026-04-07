@@ -37,12 +37,30 @@ async function getStats() {
   };
 }
 
+async function getCityCounts(): Promise<Record<string, number>> {
+  const supabase = getSupabaseServer();
+  const { data } = await supabase.from('properties').select('city').eq('status', 'published');
+  const counts: Record<string, number> = {};
+  (data || []).forEach((row: any) => { counts[row.city] = (counts[row.city] || 0) + 1; });
+  return counts;
+}
+
+async function getTypeCounts(): Promise<Record<string, number>> {
+  const supabase = getSupabaseServer();
+  const { data } = await supabase.from('properties').select('property_type').eq('status', 'published');
+  const counts: Record<string, number> = {};
+  (data || []).forEach((row: any) => { counts[row.property_type] = (counts[row.property_type] || 0) + 1; });
+  return counts;
+}
+
 export const revalidate = 60; // Revalidate every 60 seconds
 
 export default async function HomePage() {
-  const [featuredProperties, stats] = await Promise.all([
+  const [featuredProperties, stats, cityCounts, typeCounts] = await Promise.all([
     getFeaturedProperties(),
     getStats(),
+    getCityCounts(),
+    getTypeCounts(),
   ]);
 
   return (
@@ -101,7 +119,7 @@ export default async function HomePage() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            {PROPERTY_TYPES.map(({ type, label, icon, count }) => (
+            {PROPERTY_TYPES.map(({ type, label, icon }) => (
               <Link
                 key={type}
                 href={`/search?property_type=${type}`}
@@ -109,7 +127,9 @@ export default async function HomePage() {
               >
                 <span className="text-4xl group-hover:scale-110 transition-transform">{icon}</span>
                 <span className="font-medium text-slate-900 text-sm">{label}</span>
-                <span className="text-xs text-slate-400">{count} annonces</span>
+                {(typeCounts[type] || 0) > 0 && (
+                  <span className="text-xs text-slate-400">{typeCounts[type]} annonce{typeCounts[type] > 1 ? 's' : ''}</span>
+                )}
               </Link>
             ))}
           </div>
@@ -154,7 +174,9 @@ export default async function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {POPULAR_CITIES.map(({ name, count, image }) => (
+            {POPULAR_CITIES.map(({ name, image }) => {
+              const count = cityCounts[name] || 0;
+              return (
               <Link
                 key={name}
                 href={`/search?city=${name}`}
@@ -167,10 +189,11 @@ export default async function HomePage() {
                     <MapPin size={16} className="text-orange-400" />
                     <h3 className="text-xl font-bold">{name}</h3>
                   </div>
-                  <p className="text-sm text-slate-300 mt-1">{count} annonces disponibles</p>
+                  {count > 0 && <p className="text-sm text-slate-300 mt-1">{count} annonce{count > 1 ? 's' : ''} disponible{count > 1 ? 's' : ''}</p>}
                 </div>
               </Link>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

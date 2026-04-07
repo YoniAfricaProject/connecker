@@ -2,12 +2,34 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Mail, Lock, ArrowRight } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Mail, Lock, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import { Button, Input, Logo } from '@connecker/ui';
+import { useAuth } from '@/lib/auth-context';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { signIn } = useAuth();
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    const result = await signIn(email, password);
+    if (result.error) {
+      setError(result.error === 'Invalid login credentials'
+        ? 'Email ou mot de passe incorrect'
+        : result.error);
+      setLoading(false);
+    } else {
+      router.push('/');
+    }
+  };
 
   return (
     <div className="min-h-screen flex">
@@ -43,7 +65,14 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <form className="space-y-5">
+          {error && (
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+              <AlertCircle size={16} className="flex-shrink-0" />
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-5">
             <Input
               label="Adresse email"
               type="email"
@@ -51,6 +80,7 @@ export default function LoginPage() {
               icon={<Mail size={18} />}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
             />
             <Input
               label="Mot de passe"
@@ -59,6 +89,7 @@ export default function LoginPage() {
               icon={<Lock size={18} />}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              required
             />
 
             <div className="flex items-center justify-between">
@@ -66,30 +97,14 @@ export default function LoginPage() {
                 <input type="checkbox" className="rounded border-slate-300 text-orange-600 focus:ring-orange-500" />
                 Se souvenir de moi
               </label>
-              <Link href="/auth/forgot-password" className="text-sm text-orange-600 hover:text-orange-700">
-                Mot de passe oublie ?
-              </Link>
             </div>
 
-            <Button variant="primary" size="lg" className="w-full">
-              Se connecter
-              <ArrowRight size={16} className="ml-2" />
+            <Button variant="primary" size="lg" className="w-full" disabled={loading}>
+              {loading ? <Loader2 size={16} className="animate-spin mr-2" /> : null}
+              {loading ? 'Connexion...' : 'Se connecter'}
+              {!loading && <ArrowRight size={16} className="ml-2" />}
             </Button>
           </form>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-200" />
-            </div>
-            <div className="relative flex justify-center">
-              <span className="bg-slate-50 px-3 text-xs text-slate-400">ou continuer avec</span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" size="md" className="w-full">Google</Button>
-            <Button variant="outline" size="md" className="w-full">Facebook</Button>
-          </div>
         </div>
       </div>
     </div>

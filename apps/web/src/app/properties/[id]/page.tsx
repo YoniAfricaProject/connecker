@@ -5,21 +5,27 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import {
   ArrowLeft, Heart, Share2, MapPin, BedDouble, Bath, Maximize, Calendar,
-  Eye, Phone, Mail, ChevronLeft, ChevronRight, Check, Building2, Loader2
+  Eye, Phone, Mail, ChevronLeft, ChevronRight, Check, Building2, Loader2,
+  MessageCircle, Copy, CheckCircle
 } from 'lucide-react';
 import { Button, Badge, Input } from '@connecker/ui';
 import { formatPrice, formatSurface } from '@connecker/ui';
 import { getSupabase } from '@/lib/supabase';
+import { useAuth } from '@/lib/auth-context';
+import { toggleFavorite } from '@/lib/favorites';
 import type { Property } from '@connecker/shared-types';
 
 export default function PropertyDetailPage() {
   const params = useParams();
+  const { user } = useAuth();
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentImage, setCurrentImage] = useState(0);
   const [contactForm, setContactForm] = useState({ name: '', email: '', phone: '', message: '' });
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -39,13 +45,52 @@ export default function PropertyDetailPage() {
           })),
           announcer: data.users || undefined,
         } as any);
-        // Increment views
         try { await supabase.rpc('increment_views', { property_id: params.id }); } catch {}
       }
       setLoading(false);
     }
     load();
   }, [params.id]);
+
+  // Check if favorite
+  useEffect(() => {
+    if (!user || !params.id) return;
+    const supabase = getSupabase();
+    supabase.from('favorites').select('id').eq('user_id', user.id).eq('property_id', params.id).single()
+      .then(({ data }) => setIsFavorite(!!data));
+  }, [user, params.id]);
+
+  const handleFavorite = async () => {
+    if (!user || !property) {
+      window.location.href = '/auth/login';
+      return;
+    }
+    await toggleFavorite(user.id, property.id, isFavorite);
+    setIsFavorite(!isFavorite);
+  };
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    const text = property ? `${property.title} - ${formatPrice(property.price, property.currency)}` : '';
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: property?.title, text, url });
+      } catch {}
+    } else {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleWhatsApp = () => {
+    if (!property) return;
+    const phone = property.announcer?.phone?.replace(/\s/g, '').replace('+', '') || '';
+    const msg = encodeURIComponent(
+      `Bonjour, je suis interesse(e) par votre annonce "${property.title}" sur Connec'Ker.\n${window.location.href}`
+    );
+    window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+  };
 
   const handleContact = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,8 +169,14 @@ export default function PropertyDetailPage() {
           </Badge>
         </div>
         <div className="absolute top-4 right-4 flex gap-2">
-          <button className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white transition"><Heart size={18} className="text-slate-600" /></button>
-          <button className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white transition"><Share2 size={18} className="text-slate-600" /></button>
+          <button onClick={handleFavorite}
+            className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white transition">
+            <Heart size={18} className={isFavorite ? 'fill-red-500 text-red-500' : 'text-slate-600'} />
+          </button>
+          <button onClick={handleShare}
+            className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white transition">
+            {copied ? <CheckCircle size={18} className="text-emerald-500" /> : <Share2 size={18} className="text-slate-600" />}
+          </button>
         </div>
       </div>
 
@@ -200,9 +251,20 @@ export default function PropertyDetailPage() {
         </div>
 
         {/* Sidebar - Contact */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-5 sticky top-24">
             <h3 className="text-lg font-semibold text-slate-900">Contacter l&apos;annonceur</h3>
+
+            {/* WhatsApp button */}
+            {property.announcer?.phone && (
+              <button
+                onClick={handleWhatsApp}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-medium transition-colors"
+              >
+                <MessageCircle size={18} />
+                Contacter via WhatsApp
+              </button>
+            )}
 
             {sent ? (
               <div className="text-center py-6">
@@ -228,6 +290,19 @@ export default function PropertyDetailPage() {
                   {sending ? 'Envoi...' : 'Envoyer un message'}
                 </Button>
               </form>
+            )}
+
+            {property.announcer?.phone && (
+              <>
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200" /></div>
+                  <div className="relative flex justify-center"><span className="bg-white px-3 text-xs text-slate-400">ou</span></div>
+                </div>
+                <Button variant="outline" className="w-full" size="lg" onClick={() => window.open(`tel:${property.announcer?.phone}`)}>
+                  <Phone size={16} className="mr-2" />
+                  Appeler directement
+                </Button>
+              </>
             )}
           </div>
         </div>

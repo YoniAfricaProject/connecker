@@ -164,19 +164,19 @@ export const FEATURED_PROPERTIES: Property[] = [
 ];
 
 export const POPULAR_CITIES = [
-  { name: 'Dakar', count: 1243, image: '/img/Dakar.jpg' },
-  { name: 'Saint-Louis', count: 342, image: '/img/Saint-Louis.jpg' },
-  { name: 'Saly', count: 456, image: '/img/Saly.jpg' },
-  { name: 'Thies', count: 287, image: '/img/Thies.jpg' },
-  { name: 'Mbour', count: 389, image: '/img/Mbour.jpg' },
-  { name: 'Ziguinchor', count: 178, image: '/img/Ziguinchor.jpg' },
+  { name: 'Dakar', image: '/img/Dakar.jpg' },
+  { name: 'Saint-Louis', image: '/img/Saint-Louis.jpg' },
+  { name: 'Saly', image: '/img/Saly.jpg' },
+  { name: 'Thies', image: '/img/Thies.jpg' },
+  { name: 'Mbour', image: '/img/Mbour.jpg' },
+  { name: 'Ziguinchor', image: '/img/Ziguinchor.jpg' },
 ];
 
 export const PROPERTY_TYPES = [
-  { type: 'apartment', label: 'Appartements', icon: '🏢', count: 892 },
-  { type: 'house', label: 'Maisons', icon: '🏠', count: 654 },
-  { type: 'villa', label: 'Villas', icon: '🏡', count: 321 },
-  { type: 'land', label: 'Terrains', icon: '🌍', count: 478 },
-  { type: 'studio', label: 'Studios', icon: '🛏️', count: 256 },
-  { type: 'office', label: 'Bureaux', icon: '🏬', count: 134 },
+  { type: 'apartment', label: 'Appartements', icon: '🏢' },
+  { type: 'house', label: 'Maisons', icon: '🏠' },
+  { type: 'villa', label: 'Villas', icon: '🏡' },
+  { type: 'land', label: 'Terrains', icon: '🌍' },
+  { type: 'studio', label: 'Studios', icon: '🛏️' },
+  { type: 'office', label: 'Bureaux', icon: '🏬' },
 ];
