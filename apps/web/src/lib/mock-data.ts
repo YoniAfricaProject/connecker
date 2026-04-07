@@ -164,10 +164,12 @@ export const FEATURED_PROPERTIES: Property[] = [
 ];
 
 export const POPULAR_CITIES = [
-  { name: 'Dakar', count: 1243, image: 'https://images.unsplash.com/photo-1611348524140-53c9a25263d6?w=600&q=80' },
-  { name: 'Saint-Louis', count: 342, image: 'https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=600&q=80' },
-  { name: 'Thies', count: 287, image: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=600&q=80' },
-  { name: 'Mbour', count: 456, image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=80' },
+  { name: 'Dakar', count: 1243, image: '/img/Dakar.jpg' },
+  { name: 'Saint-Louis', count: 342, image: '/img/Saint-Louis.jpg' },
+  { name: 'Saly', count: 456, image: '/img/Saly.jpg' },
+  { name: 'Thies', count: 287, image: '/img/Thies.jpg' },
+  { name: 'Mbour', count: 389, image: '/img/Mbour.jpg' },
+  { name: 'Ziguinchor', count: 178, image: '/img/Ziguinchor.jpg' },
 ];
 
 export const PROPERTY_TYPES = [

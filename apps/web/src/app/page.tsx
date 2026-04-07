@@ -1,14 +1,54 @@
 import Link from 'next/link';
 import { ArrowRight, Shield, Search, Users, TrendingUp, Building2, MapPin } from 'lucide-react';
 import { PropertyCard, SearchBar, Button, Badge } from '@connecker/ui';
-import { FEATURED_PROPERTIES, POPULAR_CITIES, PROPERTY_TYPES } from '@/lib/mock-data';
+import { getSupabaseServer } from '@/lib/supabase-server';
+import { POPULAR_CITIES, PROPERTY_TYPES } from '@/lib/mock-data';
 
-export default function HomePage() {
+async function getFeaturedProperties() {
+  const supabase = getSupabaseServer();
+  const { data } = await supabase
+    .from('properties')
+    .select('*, property_images(*)')
+    .eq('status', 'published')
+    .order('views_count', { ascending: false })
+    .limit(6);
+
+  return (data || []).map((row: any) => ({
+    ...row,
+    images: (row.property_images || []).map((img: any) => ({
+      id: img.id,
+      url: img.url,
+      caption: img.caption,
+      is_primary: img.is_primary,
+      order: img.sort_order,
+    })),
+  }));
+}
+
+async function getStats() {
+  const supabase = getSupabaseServer();
+  const { count: properties } = await supabase.from('properties').select('*', { count: 'exact', head: true }).eq('status', 'published');
+  const { count: users } = await supabase.from('users').select('*', { count: 'exact', head: true });
+  const { count: announcers } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('role', 'announcer');
+  return {
+    properties: properties || 0,
+    users: users || 0,
+    announcers: announcers || 0,
+  };
+}
+
+export const revalidate = 60; // Revalidate every 60 seconds
+
+export default async function HomePage() {
+  const [featuredProperties, stats] = await Promise.all([
+    getFeaturedProperties(),
+    getStats(),
+  ]);
+
   return (
     <>
       {/* Hero Section */}
       <section className="relative min-h-[85vh] flex items-center">
-        {/* Background */}
         <div className="absolute inset-0 z-0">
           <img
             src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1920&q=80"
@@ -29,21 +69,19 @@ export default function HomePage() {
               au Senegal
             </h1>
             <p className="text-lg text-slate-300 leading-relaxed max-w-xl">
-              Des milliers d&apos;annonces verifiees pour l&apos;achat, la vente et la location de biens immobiliers dans tout le Senegal.
+              Des annonces verifiees pour l&apos;achat, la vente et la location de biens immobiliers dans tout le Senegal.
             </p>
           </div>
 
-          {/* Search Bar */}
           <div className="mt-10 max-w-4xl">
             <SearchBar />
           </div>
 
-          {/* Quick stats */}
           <div className="mt-10 flex flex-wrap gap-8">
             {[
-              { value: '2,500+', label: 'Annonces' },
-              { value: '150+', label: 'Villes' },
-              { value: '1,200+', label: 'Annonceurs' },
+              { value: `${stats.properties}`, label: 'Annonces' },
+              { value: `${stats.announcers}`, label: 'Annonceurs' },
+              { value: `${stats.users}`, label: 'Utilisateurs' },
             ].map(({ value, label }) => (
               <div key={label} className="text-center">
                 <div className="text-2xl font-bold text-white">{value}</div>
@@ -92,7 +130,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {FEATURED_PROPERTIES.map((property) => (
+            {featuredProperties.map((property: any) => (
               <Link key={property.id} href={`/properties/${property.id}`}>
                 <PropertyCard property={property} />
               </Link>
@@ -115,18 +153,14 @@ export default function HomePage() {
             <p className="mt-3 text-slate-500">Explorez l&apos;immobilier dans les principales villes</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {POPULAR_CITIES.map(({ name, count, image }) => (
               <Link
                 key={name}
                 href={`/search?city=${name}`}
                 className="group relative h-64 rounded-2xl overflow-hidden"
               >
-                <img
-                  src={image}
-                  alt={name}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
+                <img src={image} alt={name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-6">
                   <div className="flex items-center gap-2 text-white">
@@ -153,31 +187,13 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              {
-                icon: <Shield size={28} />,
-                title: 'Annonces verifiees',
-                desc: 'Chaque annonce est verifiee par notre equipe avant publication.',
-              },
-              {
-                icon: <Search size={28} />,
-                title: 'Recherche intelligente',
-                desc: 'Filtres avances et carte interactive pour trouver le bien parfait.',
-              },
-              {
-                icon: <Users size={28} />,
-                title: 'Mise en relation directe',
-                desc: 'Contactez directement les annonceurs, sans intermediaire cache.',
-              },
-              {
-                icon: <TrendingUp size={28} />,
-                title: 'Marche transparent',
-                desc: 'Des prix reels et des informations completes sur chaque bien.',
-              },
+              { icon: <Shield size={28} />, title: 'Annonces verifiees', desc: 'Chaque annonce est verifiee par notre equipe avant publication.' },
+              { icon: <Search size={28} />, title: 'Recherche intelligente', desc: 'Filtres avances et carte interactive pour trouver le bien parfait.' },
+              { icon: <Users size={28} />, title: 'Mise en relation directe', desc: 'Contactez directement les annonceurs, sans intermediaire cache.' },
+              { icon: <TrendingUp size={28} />, title: 'Marche transparent', desc: 'Des prix reels et des informations completes sur chaque bien.' },
             ].map(({ icon, title, desc }) => (
               <div key={title} className="text-center space-y-4">
-                <div className="w-14 h-14 rounded-2xl bg-orange-600/20 text-orange-400 flex items-center justify-center mx-auto">
-                  {icon}
-                </div>
+                <div className="w-14 h-14 rounded-2xl bg-orange-600/20 text-orange-400 flex items-center justify-center mx-auto">{icon}</div>
                 <h3 className="text-lg font-semibold">{title}</h3>
                 <p className="text-sm text-slate-400 leading-relaxed">{desc}</p>
               </div>
@@ -190,9 +206,7 @@ export default function HomePage() {
       <section className="py-20 bg-gradient-to-r from-orange-600 to-orange-500">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <Building2 size={48} className="text-white/80 mx-auto mb-6" />
-          <h2 className="text-3xl font-bold text-white mb-4">
-            Vous avez un bien a proposer ?
-          </h2>
+          <h2 className="text-3xl font-bold text-white mb-4">Vous avez un bien a proposer ?</h2>
           <p className="text-lg text-orange-100 mb-8 max-w-2xl mx-auto">
             Rejoignez des milliers d&apos;annonceurs et touchez des acheteurs qualifies dans tout le Senegal.
           </p>

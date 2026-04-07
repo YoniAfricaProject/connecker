@@ -18,15 +18,21 @@ export function Header() {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden lg:flex items-center gap-6">
             <Link href="/search?type=sale" className="text-sm font-medium text-slate-600 hover:text-orange-600 transition-colors">
               Acheter
             </Link>
             <Link href="/search?type=rent" className="text-sm font-medium text-slate-600 hover:text-orange-600 transition-colors">
               Louer
             </Link>
-            <Link href="/search" className="text-sm font-medium text-slate-600 hover:text-orange-600 transition-colors">
-              Rechercher
+            <Link href="/services" className="text-sm font-medium text-slate-600 hover:text-orange-600 transition-colors">
+              Services
+            </Link>
+            <Link href="/careers" className="text-sm font-medium text-slate-600 hover:text-orange-600 transition-colors">
+              Carrieres
+            </Link>
+            <Link href="/advertising" className="text-sm font-medium text-slate-600 hover:text-orange-600 transition-colors">
+              Publicites
             </Link>
             <Link href="/contact" className="text-sm font-medium text-slate-600 hover:text-orange-600 transition-colors">
               Contact
@@ -34,7 +40,7 @@ export function Header() {
           </nav>
 
           {/* Desktop Actions */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-3">
             <Link href="/auth/login">
               <Button variant="ghost" size="sm">
                 <User size={16} className="mr-2" />
@@ -52,7 +58,7 @@ export function Header() {
           {/* Mobile menu button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100"
+            className="lg:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100"
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -60,15 +66,21 @@ export function Header() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-slate-100 space-y-2">
+          <div className="lg:hidden py-4 border-t border-slate-100 space-y-2">
             <Link href="/search?type=sale" className="block px-4 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-orange-50 hover:text-orange-600">
               Acheter
             </Link>
             <Link href="/search?type=rent" className="block px-4 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-orange-50 hover:text-orange-600">
               Louer
             </Link>
-            <Link href="/search" className="block px-4 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-orange-50 hover:text-orange-600">
-              Rechercher
+            <Link href="/services" className="block px-4 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-orange-50 hover:text-orange-600">
+              Services
+            </Link>
+            <Link href="/careers" className="block px-4 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-orange-50 hover:text-orange-600">
+              Carrieres
+            </Link>
+            <Link href="/advertising" className="block px-4 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-orange-50 hover:text-orange-600">
+              Publicites
             </Link>
             <Link href="/contact" className="block px-4 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-orange-50 hover:text-orange-600">
               Contact

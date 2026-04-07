@@ -1,39 +1,123 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Search, MapPin, SlidersHorizontal } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Search, MapPin, SlidersHorizontal, Building2, ChevronDown, X, BedDouble, Maximize, Banknote } from 'lucide-react';
 import { cn } from './utils';
 import { Button } from './button';
+import { DAKAR_COMMUNES, OTHER_CITIES, PROPERTY_TYPE_OPTIONS } from './dakar-data';
 
 interface SearchBarProps {
-  onSearch?: (filters: { query: string; city: string; transaction_type: string }) => void;
+  onSearch?: (filters: {
+    query: string; city: string; district: string;
+    transaction_type: string; property_type: string;
+    price_min: string; price_max: string; surface_min: string; bedrooms_min: string;
+  }) => void;
   className?: string;
   variant?: 'hero' | 'compact';
 }
 
+function buildSearchUrl(params: Record<string, string>) {
+  const url = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => { if (v) url.set(k, v); });
+  return `/search?${url.toString()}`;
+}
+
 export function SearchBar({ onSearch, className, variant = 'hero' }: SearchBarProps) {
-  const [query, setQuery] = useState('');
-  const [city, setCity] = useState('');
+  const [commune, setCommune] = useState('');
+  const [district, setDistrict] = useState('');
+  const [propertyType, setPropertyType] = useState('');
   const [transactionType, setTransactionType] = useState('sale');
+  const [showFilters, setShowFilters] = useState(false);
+  const [priceMin, setPriceMin] = useState('');
+  const [priceMax, setPriceMax] = useState('');
+  const [surfaceMin, setSurfaceMin] = useState('');
+  const [bedroomsMin, setBedroomsMin] = useState('');
+
+  const quartiers = useMemo(() => {
+    if (!commune) return [];
+    return DAKAR_COMMUNES[commune] || [];
+  }, [commune]);
+
+  const activeFiltersCount = [priceMin, priceMax, surfaceMin, bedroomsMin].filter(Boolean).length;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch?.({ query, city, transaction_type: transactionType });
+    const filters = {
+      query: propertyType,
+      city: commune || '',
+      district: district || '',
+      transaction_type: transactionType,
+      property_type: propertyType,
+      price_min: priceMin,
+      price_max: priceMax,
+      surface_min: surfaceMin,
+      bedrooms_min: bedroomsMin,
+    };
+    if (onSearch) {
+      onSearch(filters);
+    } else {
+      window.location.href = buildSearchUrl({
+        type: transactionType,
+        city: commune,
+        district,
+        property_type: propertyType,
+        price_min: priceMin,
+        price_max: priceMax,
+        surface_min: surfaceMin,
+        bedrooms_min: bedroomsMin,
+      });
+    }
   };
+
+  const handleCommuneChange = (value: string) => {
+    setCommune(value);
+    setDistrict('');
+  };
+
+  const resetFilters = () => {
+    setPriceMin(''); setPriceMax(''); setSurfaceMin(''); setBedroomsMin('');
+  };
+
+  const selectClass = 'w-full appearance-none rounded-xl border border-slate-200 px-4 py-3.5 pr-10 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer';
+  const inputClass = 'w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder:text-slate-400';
 
   if (variant === 'compact') {
     return (
-      <form onSubmit={handleSubmit} className={cn('flex items-center gap-2', className)}>
-        <div className="relative flex-1">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Rechercher un bien..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
+      <form onSubmit={handleSubmit} className={cn('flex flex-wrap items-center gap-2', className)}>
+        <div className="relative flex-1 min-w-[180px]">
+          <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <select value={commune} onChange={(e) => handleCommuneChange(e.target.value)}
+            className="w-full appearance-none pl-9 pr-8 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-500">
+            <option value="">Ville / Commune</option>
+            <optgroup label="Dakar">
+              {Object.keys(DAKAR_COMMUNES).map(c => <option key={c} value={c}>{c}</option>)}
+            </optgroup>
+            <optgroup label="Autres villes">
+              {OTHER_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </optgroup>
+          </select>
+          <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
         </div>
+
+        {quartiers.length > 0 && (
+          <div className="relative min-w-[150px]">
+            <select value={district} onChange={(e) => setDistrict(e.target.value)}
+              className="w-full appearance-none px-4 pr-8 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-500">
+              <option value="">Quartier</option>
+              {quartiers.map(q => <option key={q} value={q}>{q}</option>)}
+            </select>
+            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+          </div>
+        )}
+
+        <div className="relative min-w-[150px]">
+          <select value={propertyType} onChange={(e) => setPropertyType(e.target.value)}
+            className="w-full appearance-none px-4 pr-8 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-500">
+            {PROPERTY_TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+          <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+        </div>
+
         <Button type="submit" size="sm">Rechercher</Button>
       </form>
     );
@@ -43,12 +127,12 @@ export function SearchBar({ onSearch, className, variant = 'hero' }: SearchBarPr
     <form
       onSubmit={handleSubmit}
       className={cn(
-        'bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl shadow-slate-900/10 p-2',
+        'bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl shadow-slate-900/10 p-4 sm:p-5',
         className
       )}
     >
       {/* Transaction type toggle */}
-      <div className="flex gap-1 mb-3 p-1 bg-slate-100 rounded-xl">
+      <div className="flex gap-1 mb-4 p-1 bg-slate-100 rounded-xl">
         {[
           { value: 'sale', label: 'Acheter' },
           { value: 'rent', label: 'Louer' },
@@ -69,44 +153,173 @@ export function SearchBar({ onSearch, className, variant = 'hero' }: SearchBarPr
         ))}
       </div>
 
-      {/* Search fields */}
-      <div className="flex flex-col sm:flex-row gap-2">
+      {/* Row 1: Commune + Quartier */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-3">
         <div className="relative flex-1">
-          <MapPin size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Ville, quartier..."
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            className="w-full pl-10 pr-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
+          <MapPin size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-400 z-10" />
+          <select
+            value={commune}
+            onChange={(e) => handleCommuneChange(e.target.value)}
+            className={cn(selectClass, 'pl-10')}
+          >
+            <option value="">Ville, commune...</option>
+            <optgroup label="-- Dakar --">
+              {Object.keys(DAKAR_COMMUNES).map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </optgroup>
+            <optgroup label="-- Autres villes --">
+              {OTHER_CITIES.map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </optgroup>
+          </select>
+          <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
         </div>
 
         <div className="relative flex-1">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Appartement, villa, terrain..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
+          <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-400 z-10" />
+          <select
+            value={district}
+            onChange={(e) => setDistrict(e.target.value)}
+            disabled={quartiers.length === 0}
+            className={cn(selectClass, 'pl-10', quartiers.length === 0 && 'opacity-50 cursor-not-allowed')}
+          >
+            <option value="">{quartiers.length > 0 ? 'Choisir un quartier...' : 'Selectionnez une commune d\'abord'}</option>
+            {quartiers.map(q => (
+              <option key={q} value={q}>{q}</option>
+            ))}
+          </select>
+          <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+        </div>
+      </div>
+
+      {/* Row 2: Property type + Filters + Search */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Building2 size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-400 z-10" />
+          <select
+            value={propertyType}
+            onChange={(e) => setPropertyType(e.target.value)}
+            className={cn(selectClass, 'pl-10')}
+          >
+            {PROPERTY_TYPE_OPTIONS.map(({ value, label }) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </select>
+          <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
         </div>
 
         <div className="flex gap-2">
           <button
             type="button"
-            className="flex items-center gap-2 px-4 py-3.5 rounded-xl border border-slate-200 text-sm text-slate-600 hover:border-orange-500 hover:text-orange-600 transition-colors"
+            onClick={() => setShowFilters(!showFilters)}
+            className={cn(
+              'relative flex items-center gap-2 px-4 py-3.5 rounded-xl border text-sm transition-colors',
+              showFilters
+                ? 'border-orange-500 bg-orange-50 text-orange-600'
+                : 'border-slate-200 text-slate-600 hover:border-orange-500 hover:text-orange-600'
+            )}
           >
             <SlidersHorizontal size={16} />
             <span className="hidden sm:inline">Filtres</span>
+            {activeFiltersCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-orange-600 text-white text-[10px] font-bold flex items-center justify-center">
+                {activeFiltersCount}
+              </span>
+            )}
           </button>
 
-          <Button type="submit" size="lg" className="whitespace-nowrap">
+          <Button type="submit" size="lg" className="whitespace-nowrap px-8">
             Rechercher
           </Button>
         </div>
       </div>
+
+      {/* Advanced Filters Panel */}
+      {showFilters && (
+        <div className="mt-4 pt-4 border-t border-slate-200 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-slate-700">Filtres avances</h3>
+            <div className="flex items-center gap-2">
+              {activeFiltersCount > 0 && (
+                <button type="button" onClick={resetFilters} className="text-xs text-orange-600 hover:text-orange-700 font-medium">
+                  Reinitialiser
+                </button>
+              )}
+              <button type="button" onClick={() => setShowFilters(false)} className="text-slate-400 hover:text-slate-600">
+                <X size={16} />
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {/* Prix min */}
+            <div>
+              <label className="flex items-center gap-1.5 text-xs font-medium text-slate-500 mb-1.5">
+                <Banknote size={12} /> Budget min (XOF)
+              </label>
+              <input
+                type="number"
+                placeholder="Ex: 100 000"
+                value={priceMin}
+                onChange={(e) => setPriceMin(e.target.value)}
+                className={inputClass}
+              />
+            </div>
+
+            {/* Prix max */}
+            <div>
+              <label className="flex items-center gap-1.5 text-xs font-medium text-slate-500 mb-1.5">
+                <Banknote size={12} /> Budget max (XOF)
+              </label>
+              <input
+                type="number"
+                placeholder="Ex: 50 000 000"
+                value={priceMax}
+                onChange={(e) => setPriceMax(e.target.value)}
+                className={inputClass}
+              />
+            </div>
+
+            {/* Surface min */}
+            <div>
+              <label className="flex items-center gap-1.5 text-xs font-medium text-slate-500 mb-1.5">
+                <Maximize size={12} /> Surface min (m2)
+              </label>
+              <input
+                type="number"
+                placeholder="Ex: 50"
+                value={surfaceMin}
+                onChange={(e) => setSurfaceMin(e.target.value)}
+                className={inputClass}
+              />
+            </div>
+
+            {/* Chambres min */}
+            <div>
+              <label className="flex items-center gap-1.5 text-xs font-medium text-slate-500 mb-1.5">
+                <BedDouble size={12} /> Chambres min
+              </label>
+              <div className="relative">
+                <select
+                  value={bedroomsMin}
+                  onChange={(e) => setBedroomsMin(e.target.value)}
+                  className={cn(inputClass, 'appearance-none pr-8')}
+                >
+                  <option value="">Peu importe</option>
+                  <option value="1">1+</option>
+                  <option value="2">2+</option>
+                  <option value="3">3+</option>
+                  <option value="4">4+</option>
+                  <option value="5">5+</option>
+                </select>
+                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </form>
   );
 }
