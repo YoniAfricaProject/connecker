@@ -3,6 +3,7 @@ import './globals.css';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { AuthProvider } from '@/lib/auth-context';
+import { PageTracker } from '@/components/page-tracker';
 
 export const metadata: Metadata = {
   title: "Connec'Kër - Trouvez votre bien immobilier",
@@ -19,6 +20,7 @@ export default function RootLayout({
     <html lang="fr">
       <body className="font-sans">
         <AuthProvider>
+          <PageTracker />
           <Header />
           <main className="min-h-screen">{children}</main>
           <Footer />
