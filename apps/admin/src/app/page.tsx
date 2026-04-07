@@ -2,11 +2,12 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Building2, Users, MessageSquare, AlertCircle, ArrowUpRight, Loader2, TrendingUp, Clock, Globe, Smartphone, Eye, Zap } from 'lucide-react';
+import { Building2, Users, MessageSquare, AlertCircle, ArrowUpRight, Loader2, TrendingUp, Clock, Globe, Smartphone, Eye, Zap, DollarSign, Megaphone, Percent, CreditCard } from 'lucide-react';
 import { Card, Badge } from '@connecker/ui';
+import { formatPrice } from '@connecker/ui';
 import { getSupabase } from '@/lib/supabase';
 import { useAdminAuth } from '@/lib/auth-context';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, CartesianGrid } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, CartesianGrid, LineChart, Line, Legend } from 'recharts';
 
 const CHART_COLORS = ['#f97316', '#6366f1', '#10b981', '#f43f5e', '#eab308', '#06b6d4'];
 
@@ -52,6 +53,9 @@ export default function AdminDashboard() {
   const [recentLeads, setRecentLeads] = useState<any[]>([]);
   const [traffic, setTraffic] = useState<{ hourly: any[]; daily: any[]; pages: any[]; devices: any[]; todayViews: number; weekViews: number }>({
     hourly: [], daily: [], pages: [], devices: [], todayViews: 0, weekViews: 0,
+  });
+  const [revenue, setRevenue] = useState<{ total: number; byType: any[]; monthly: any[]; recent: any[] }>({
+    total: 0, byType: [], monthly: [], recent: [],
   });
   const [loading, setLoading] = useState(true);
 
@@ -142,6 +146,46 @@ export default function AdminDashboard() {
 
           setStats(s => ({ ...s, totalViews: totalViews || 0 }));
         }
+
+        // Revenue data
+        const { data: revData } = await supabase
+          .from('revenues')
+          .select('*')
+          .order('created_at', { ascending: true });
+
+        if (revData) {
+          const total = revData.reduce((s, r) => s + Number(r.amount), 0);
+
+          // By type
+          const typeMap: Record<string, number> = { advertising: 0, commission: 0, subscription: 0 };
+          revData.forEach(r => { typeMap[r.type] = (typeMap[r.type] || 0) + Number(r.amount); });
+          const typeLabels: Record<string, string> = { advertising: 'Publicite', commission: 'Commissions', subscription: 'Abonnements' };
+          const byType = Object.entries(typeMap).map(([type, amount]) => ({ name: typeLabels[type] || type, value: amount }));
+
+          // Monthly revenue (last 6 months)
+          const monthlyMap: Record<string, { pub: number; com: number; abo: number }> = {};
+          for (let i = 5; i >= 0; i--) {
+            const d = new Date();
+            d.setMonth(d.getMonth() - i);
+            const key = d.toLocaleDateString('fr-FR', { month: 'short' });
+            monthlyMap[key] = { pub: 0, com: 0, abo: 0 };
+          }
+          revData.forEach(r => {
+            const d = new Date(r.created_at);
+            const key = d.toLocaleDateString('fr-FR', { month: 'short' });
+            if (monthlyMap[key]) {
+              if (r.type === 'advertising') monthlyMap[key].pub += Number(r.amount);
+              else if (r.type === 'commission') monthlyMap[key].com += Number(r.amount);
+              else monthlyMap[key].abo += Number(r.amount);
+            }
+          });
+          const monthly = Object.entries(monthlyMap).map(([mois, v]) => ({ mois, Publicite: v.pub, Commissions: v.com, Abonnements: v.abo }));
+
+          // Recent transactions
+          const recent = [...revData].reverse().slice(0, 6);
+
+          setRevenue({ total, byType, monthly, recent });
+        }
       }
 
       setLoading(false);
@@ -188,6 +232,145 @@ export default function AdminDashboard() {
       {/* Super Admin Analytics */}
       {isSuperAdmin && (
         <>
+          {/* Revenue Section */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <div className="relative overflow-hidden rounded-2xl p-6 text-white bg-gradient-to-br from-green-500 to-emerald-600">
+              <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/10 -translate-y-1/2 translate-x-1/2" />
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-3">
+                  <DollarSign size={18} />
+                  <span className="text-sm font-medium text-white/80">Revenus totaux</span>
+                </div>
+                <div className="text-3xl font-bold tracking-tight">{formatPrice(revenue.total)}</div>
+              </div>
+            </div>
+            <div className="relative overflow-hidden rounded-2xl p-6 text-white bg-gradient-to-br from-violet-500 to-purple-600">
+              <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/10 -translate-y-1/2 translate-x-1/2" />
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-3">
+                  <Percent size={18} />
+                  <span className="text-sm font-medium text-white/80">Commissions</span>
+                </div>
+                <div className="text-3xl font-bold tracking-tight">{formatPrice(revenue.byType.find(t => t.name === 'Commissions')?.value || 0)}</div>
+              </div>
+            </div>
+            <div className="relative overflow-hidden rounded-2xl p-6 text-white bg-gradient-to-br from-sky-500 to-blue-600">
+              <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/10 -translate-y-1/2 translate-x-1/2" />
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-3">
+                  <CreditCard size={18} />
+                  <span className="text-sm font-medium text-white/80">Pub + Abonnements</span>
+                </div>
+                <div className="text-3xl font-bold tracking-tight">{formatPrice((revenue.byType.find(t => t.name === 'Publicite')?.value || 0) + (revenue.byType.find(t => t.name === 'Abonnements')?.value || 0))}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Revenue charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            {/* Monthly revenue stacked */}
+            <Card className="p-6 lg:col-span-3">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h2 className="text-lg font-bold text-slate-900">Revenus mensuels</h2>
+                  <p className="text-sm text-slate-500">Repartition par source</p>
+                </div>
+                <TrendingUp size={18} className="text-slate-300" />
+              </div>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={revenue.monthly} barCategoryGap="25%">
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                  <XAxis dataKey="mois" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={(v) => v >= 1000000 ? `${(v/1000000).toFixed(1)}M` : v >= 1000 ? `${(v/1000).toFixed(0)}K` : v} />
+                  <Tooltip content={({ active, payload, label }: any) => {
+                    if (!active || !payload?.length) return null;
+                    return (
+                      <div className="bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl text-xs space-y-1.5">
+                        <p className="text-slate-400 font-medium">{label}</p>
+                        {payload.map((p: any, i: number) => (
+                          <p key={i} className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.fill }} />
+                            {p.dataKey}: <span className="font-bold">{formatPrice(p.value)}</span>
+                          </p>
+                        ))}
+                      </div>
+                    );
+                  }} />
+                  <Bar dataKey="Publicite" stackId="rev" fill="#f97316" radius={[0, 0, 0, 0]} />
+                  <Bar dataKey="Commissions" stackId="rev" fill="#8b5cf6" radius={[0, 0, 0, 0]} />
+                  <Bar dataKey="Abonnements" stackId="rev" fill="#06b6d4" radius={[4, 4, 0, 0]} />
+                  <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
+                </BarChart>
+              </ResponsiveContainer>
+            </Card>
+
+            {/* Revenue by type donut + recent */}
+            <Card className="p-6 lg:col-span-2">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-lg font-bold text-slate-900">Par source</h2>
+                  <p className="text-sm text-slate-500">Repartition des revenus</p>
+                </div>
+              </div>
+              <div className="flex justify-center">
+                <ResponsiveContainer width={180} height={180}>
+                  <PieChart>
+                    <Pie data={revenue.byType} cx="50%" cy="50%" innerRadius={55} outerRadius={80} dataKey="value" strokeWidth={3} stroke="#fff">
+                      {revenue.byType.map((_, i) => <Cell key={i} fill={['#f97316', '#8b5cf6', '#06b6d4'][i % 3]} />)}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="space-y-3 mt-4">
+                {revenue.byType.map((t, i) => {
+                  const pct = revenue.total > 0 ? Math.round((t.value / revenue.total) * 100) : 0;
+                  const colors = ['#f97316', '#8b5cf6', '#06b6d4'];
+                  return (
+                    <div key={t.name} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: colors[i] }} />
+                        <span className="text-sm text-slate-700">{t.name}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-20 h-2 rounded-full bg-slate-100 overflow-hidden">
+                          <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: colors[i] }} />
+                        </div>
+                        <span className="text-xs font-bold text-slate-900 w-10 text-right">{pct}%</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Recent transactions */}
+              <div className="mt-6 pt-4 border-t border-slate-100">
+                <h3 className="text-sm font-semibold text-slate-900 mb-3">Dernieres transactions</h3>
+                <div className="space-y-2">
+                  {revenue.recent.map((r: any) => {
+                    const typeIcon: Record<string, { icon: any; color: string }> = {
+                      advertising: { icon: Megaphone, color: 'text-orange-500 bg-orange-50' },
+                      commission: { icon: Percent, color: 'text-purple-500 bg-purple-50' },
+                      subscription: { icon: CreditCard, color: 'text-sky-500 bg-sky-50' },
+                    };
+                    const t = typeIcon[r.type] || typeIcon.commission;
+                    const Icon = t.icon;
+                    return (
+                      <div key={r.id} className="flex items-center gap-3">
+                        <div className={`w-7 h-7 rounded-lg ${t.color} flex items-center justify-center flex-shrink-0`}>
+                          <Icon size={13} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs text-slate-700 truncate">{r.description}</div>
+                        </div>
+                        <span className="text-xs font-bold text-emerald-600 flex-shrink-0">+{formatPrice(Number(r.amount))}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </Card>
+          </div>
+
           {/* Quick traffic stats */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Card className="p-5 border-l-4 border-l-orange-500">
