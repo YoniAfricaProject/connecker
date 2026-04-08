@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">Connec\'Kër</string>
-    <string name="title_activity_main">Connec\'Kër</string>
-    <string name="package_name">com.connecker.app</string>
-    <string name="custom_url_scheme">com.connecker.app</string>
-</resources>
