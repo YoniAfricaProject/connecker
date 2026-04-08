@@ -11,7 +11,7 @@ export default function RootLayout() {
         <Stack.Screen name="onboarding" />
         <Stack.Screen name="auth" />
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="property/[id]" options={{ headerShown: true, headerTitle: '', headerBackTitle: 'Retour' }} />
+        <Stack.Screen name="property/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="profile/edit" />
         <Stack.Screen name="estimate/index" />
         <Stack.Screen name="pages/services" />

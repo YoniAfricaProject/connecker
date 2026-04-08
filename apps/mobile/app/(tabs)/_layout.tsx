@@ -16,9 +16,7 @@ export default function TabLayout() {
         },
         tabBarIconStyle: { marginBottom: -2 },
         tabBarLabelStyle: { fontSize: 9, fontWeight: '500' },
-        headerStyle: { backgroundColor: Colors.white },
-        headerTitleStyle: { fontWeight: '700', fontSize: 15 },
-        headerShadowVisible: false,
+        headerShown: false,
       }}
     >
       <Tabs.Screen
@@ -26,7 +24,6 @@ export default function TabLayout() {
         options={{
           title: 'Accueil',
           tabBarIcon: ({ color }) => <Ionicons name="home" size={20} color={color} />,
-          headerShown: false,
         }}
       />
       <Tabs.Screen
@@ -34,7 +31,6 @@ export default function TabLayout() {
         options={{
           title: 'Rechercher',
           tabBarIcon: ({ color }) => <Ionicons name="search" size={20} color={color} />,
-          headerTitle: 'Rechercher',
         }}
       />
       <Tabs.Screen
@@ -44,7 +40,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <Ionicons name="add-circle" size={24} color={Colors.orange} />
           ),
-          headerTitle: 'Publier une annonce',
         }}
       />
       <Tabs.Screen
@@ -52,7 +47,6 @@ export default function TabLayout() {
         options={{
           title: 'Favoris',
           tabBarIcon: ({ color }) => <Ionicons name="heart" size={20} color={color} />,
-          headerTitle: 'Mes favoris',
         }}
       />
       <Tabs.Screen
@@ -60,7 +54,6 @@ export default function TabLayout() {
         options={{
           title: 'Profil',
           tabBarIcon: ({ color }) => <Ionicons name="person" size={20} color={color} />,
-          headerTitle: 'Mon profil',
         }}
       />
     </Tabs>

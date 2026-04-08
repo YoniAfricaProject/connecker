@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, Image, TouchableOpacity, Dimensions, Linking, ActivityIndicator } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
@@ -16,6 +16,7 @@ function formatPrice(price: number) {
 
 export default function PropertyDetail() {
   const { id } = useLocalSearchParams();
+  const router = useRouter();
   const { user } = useAuth();
   const [property, setProperty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -85,6 +86,9 @@ export default function PropertyDetail() {
             ))}
           </View>
         )}
+        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={18} color={Colors.slate900} />
+        </TouchableOpacity>
         <TouchableOpacity style={styles.favBtn} onPress={toggleFavorite}>
           <Ionicons name={isFavorite ? 'heart' : 'heart-outline'} size={22} color={isFavorite ? Colors.red : Colors.slate600} />
         </TouchableOpacity>
@@ -158,7 +162,8 @@ const styles = StyleSheet.create({
   dots: { position: 'absolute', bottom: 10, left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', gap: 4 },
   dot: { width: 5, height: 5, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.5)' },
   dotActive: { backgroundColor: '#fff', width: 14 },
-  favBtn: { position: 'absolute', top: 10, right: 10, width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(255,255,255,0.9)', justifyContent: 'center', alignItems: 'center' },
+  backBtn: { position: 'absolute', top: 50, left: 12, width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(255,255,255,0.9)', justifyContent: 'center', alignItems: 'center', zIndex: 10 },
+  favBtn: { position: 'absolute', top: 50, right: 10, width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(255,255,255,0.9)', justifyContent: 'center', alignItems: 'center' },
   content: { padding: 16 },
   priceRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   price: { fontSize: 18, fontWeight: '800', color: Colors.orange },
