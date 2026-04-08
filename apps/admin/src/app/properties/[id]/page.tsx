@@ -7,6 +7,7 @@ import { ArrowLeft, CheckCircle, XCircle, Loader2, MapPin, BedDouble, Bath, Maxi
 import { Button, Badge, Card } from '@connecker/ui';
 import { formatPrice, formatSurface } from '@connecker/ui';
 import { getSupabase } from '@/lib/supabase';
+import { TektalPlayer } from '@/components/tektal-player';
 
 export default function AdminPropertyDetailPage() {
   const params = useParams();
@@ -124,6 +125,14 @@ export default function AdminPropertyDetailPage() {
                 </div>
               </div>
             )}
+          </Card>
+
+          {/* Tektal - voice note */}
+          <Card className="p-6">
+            <h3 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
+              <span className="text-orange-500">🎙</span> Tektal - Description vocale
+            </h3>
+            <TektalPlayer propertyId={property.id} />
           </Card>
 
           {/* Photos - moderation */}

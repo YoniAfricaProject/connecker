@@ -11,12 +11,13 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: Colors.white,
           borderTopColor: Colors.slate100,
-          paddingTop: 4,
-          height: 85,
+          paddingTop: 2,
+          height: 75,
         },
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+        tabBarIconStyle: { marginBottom: -2 },
+        tabBarLabelStyle: { fontSize: 9, fontWeight: '500' },
         headerStyle: { backgroundColor: Colors.white },
-        headerTitleStyle: { fontWeight: '700', fontSize: 17 },
+        headerTitleStyle: { fontWeight: '700', fontSize: 15 },
         headerShadowVisible: false,
       }}
     >
@@ -24,7 +25,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Accueil',
-          tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
+          tabBarIcon: ({ color }) => <Ionicons name="home" size={20} color={color} />,
           headerShown: false,
         }}
       />
@@ -32,7 +33,7 @@ export default function TabLayout() {
         name="search"
         options={{
           title: 'Rechercher',
-          tabBarIcon: ({ color, size }) => <Ionicons name="search" size={size} color={color} />,
+          tabBarIcon: ({ color }) => <Ionicons name="search" size={20} color={color} />,
           headerTitle: 'Rechercher',
         }}
       />
@@ -40,8 +41,8 @@ export default function TabLayout() {
         name="publish"
         options={{
           title: 'Publier',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="add-circle" size={size + 6} color={Colors.orange} />
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="add-circle" size={24} color={Colors.orange} />
           ),
           headerTitle: 'Publier une annonce',
         }}
@@ -50,7 +51,7 @@ export default function TabLayout() {
         name="favorites"
         options={{
           title: 'Favoris',
-          tabBarIcon: ({ color, size }) => <Ionicons name="heart" size={size} color={color} />,
+          tabBarIcon: ({ color }) => <Ionicons name="heart" size={20} color={color} />,
           headerTitle: 'Mes favoris',
         }}
       />
@@ -58,7 +59,7 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: 'Profil',
-          tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
+          tabBarIcon: ({ color }) => <Ionicons name="person" size={20} color={color} />,
           headerTitle: 'Mon profil',
         }}
       />

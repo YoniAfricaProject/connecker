@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,7 +10,7 @@ function formatPrice(price: number) {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(price);
 }
 
-export default function FavoritesTab() {
+export default function ProfileFavoritesPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [properties, setProperties] = useState<any[]>([]);
@@ -28,36 +28,26 @@ export default function FavoritesTab() {
     }, [user, authLoading])
   );
 
-  if (!authLoading && !user) {
-    return (
-      <View style={styles.center}>
-        <Ionicons name="heart-outline" size={48} color={Colors.slate300} />
-        <Text style={styles.title}>Connectez-vous</Text>
-        <Text style={styles.sub}>Pour sauvegarder vos biens preferes</Text>
-        <TouchableOpacity style={styles.button} onPress={() => router.push('/auth/login')}>
-          <Text style={styles.buttonText}>Se connecter</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
-  if (loading) return <View style={styles.center}><ActivityIndicator size="large" color={Colors.orange} /></View>;
-
   return (
     <View style={styles.container}>
-      {properties.length === 0 ? (
-        <View style={styles.center}>
-          <Ionicons name="heart-outline" size={48} color={Colors.slate300} />
-          <Text style={styles.title}>Aucun favori</Text>
-          <Text style={styles.sub}>Explorez les biens et cliquez sur le coeur</Text>
-          <TouchableOpacity style={styles.button} onPress={() => router.push('/(tabs)/search')}>
-            <Text style={styles.buttonText}>Explorer</Text>
-          </TouchableOpacity>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()}><Ionicons name="arrow-back" size={20} color={Colors.slate900} /></TouchableOpacity>
+        <Text style={styles.headerTitle}>Mes favoris</Text>
+        <View style={{ width: 20 }} />
+      </View>
+
+      {loading ? (
+        <ActivityIndicator size="small" color={Colors.orange} style={{ marginTop: 40 }} />
+      ) : properties.length === 0 ? (
+        <View style={styles.empty}>
+          <Ionicons name="heart-outline" size={36} color={Colors.slate200} />
+          <Text style={styles.emptyTitle}>Aucun favori</Text>
+          <Text style={styles.emptySub}>Explorez les biens et cliquez sur le coeur</Text>
         </View>
       ) : (
         <FlatList
           data={properties}
-          contentContainerStyle={{ padding: 16 }}
+          contentContainerStyle={{ padding: 14 }}
           renderItem={({ item: p }) => {
             const img = p.property_images?.find((i: any) => i.is_primary) || p.property_images?.[0];
             return (
@@ -80,11 +70,11 @@ export default function FavoritesTab() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.slate50 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24, backgroundColor: Colors.white },
-  title: { fontSize: 15, fontWeight: '700', color: Colors.slate900, marginTop: 14 },
-  sub: { fontSize: 11, color: Colors.slate500, marginTop: 5, textAlign: 'center' },
-  button: { backgroundColor: Colors.orange, paddingVertical: 12, paddingHorizontal: 20, borderRadius: 12, marginTop: 16 },
-  buttonText: { fontSize: 12, fontWeight: '600', color: Colors.white },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 56, paddingBottom: 10, backgroundColor: Colors.white },
+  headerTitle: { fontSize: 14, fontWeight: '700', color: Colors.slate900 },
+  empty: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
+  emptyTitle: { fontSize: 14, fontWeight: '600', color: Colors.slate900, marginTop: 12 },
+  emptySub: { fontSize: 10, color: Colors.slate400, marginTop: 4 },
   card: { flexDirection: 'row', backgroundColor: Colors.white, borderRadius: 12, borderWidth: 1, borderColor: Colors.slate100, marginBottom: 10, overflow: 'hidden' },
   image: { width: 100, height: 88 },
   content: { flex: 1, padding: 10, justifyContent: 'center' },

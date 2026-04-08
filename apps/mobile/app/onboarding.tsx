@@ -62,7 +62,7 @@ export default function Onboarding() {
         renderItem={({ item }) => (
           <View style={[styles.slide, { width }]}>
             <View style={[styles.iconCircle, { backgroundColor: item.color + '20' }]}>
-              <Ionicons name={item.icon} size={60} color={item.color} />
+              <Ionicons name={item.icon} size={36} color={item.color} />
             </View>
             <Text style={styles.title}>{item.title}</Text>
             <Text style={styles.description}>{item.description}</Text>
@@ -83,23 +83,23 @@ export default function Onboarding() {
         <Text style={styles.buttonText}>
           {currentIndex === SLIDES.length - 1 ? 'Commencer' : 'Suivant'}
         </Text>
-        <Ionicons name="arrow-forward" size={18} color="#fff" />
+        <Ionicons name="arrow-forward" size={14} color="#fff" />
       </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.white, paddingBottom: 50 },
-  skip: { position: 'absolute', top: 60, right: 24, zIndex: 10 },
-  skipText: { fontSize: 15, color: Colors.slate500 },
-  slide: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 40 },
-  iconCircle: { width: 120, height: 120, borderRadius: 60, justifyContent: 'center', alignItems: 'center', marginBottom: 40 },
-  title: { fontSize: 26, fontWeight: '700', color: Colors.slate900, textAlign: 'center', marginBottom: 16 },
-  description: { fontSize: 16, color: Colors.slate500, textAlign: 'center', lineHeight: 24 },
-  dots: { flexDirection: 'row', justifyContent: 'center', marginBottom: 30 },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.slate200, marginHorizontal: 4 },
-  dotActive: { backgroundColor: Colors.orange, width: 24 },
-  button: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.orange, marginHorizontal: 24, paddingVertical: 16, borderRadius: 16, gap: 8 },
-  buttonText: { fontSize: 16, fontWeight: '600', color: '#fff' },
+  container: { flex: 1, backgroundColor: Colors.white, paddingBottom: 40 },
+  skip: { position: 'absolute', top: 56, right: 20, zIndex: 10 },
+  skipText: { fontSize: 11, color: Colors.slate500 },
+  slide: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 36 },
+  iconCircle: { width: 80, height: 80, borderRadius: 40, justifyContent: 'center', alignItems: 'center', marginBottom: 28 },
+  title: { fontSize: 18, fontWeight: '700', color: Colors.slate900, textAlign: 'center', marginBottom: 10 },
+  description: { fontSize: 12, color: Colors.slate500, textAlign: 'center', lineHeight: 18 },
+  dots: { flexDirection: 'row', justifyContent: 'center', marginBottom: 20 },
+  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: Colors.slate200, marginHorizontal: 3 },
+  dotActive: { backgroundColor: Colors.orange, width: 18 },
+  button: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.orange, marginHorizontal: 20, paddingVertical: 13, borderRadius: 12, gap: 6 },
+  buttonText: { fontSize: 13, fontWeight: '600', color: '#fff' },
 });

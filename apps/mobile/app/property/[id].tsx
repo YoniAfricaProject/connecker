@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, Image, TouchableOpacity, Dimensions, Linking, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../lib/auth-context';
+import { TektalPlayerMobile } from '../../components/tektal-player-mobile';
 import { Colors } from '../../lib/colors';
 
 const { width } = Dimensions.get('window');
@@ -23,6 +25,14 @@ export default function PropertyDetail() {
   useEffect(() => {
     supabase.from('properties').select('*, property_images(*), users!announcer_id(*)').eq('id', id).single()
       .then(({ data }) => { setProperty(data); setLoading(false); });
+
+    // Save to recently viewed
+    AsyncStorage.getItem('recently_viewed').then(val => {
+      const ids: string[] = val ? JSON.parse(val) : [];
+      const filtered = ids.filter(i => i !== id);
+      const updated = [id as string, ...filtered].slice(0, 10);
+      AsyncStorage.setItem('recently_viewed', JSON.stringify(updated));
+    });
   }, [id]);
 
   useEffect(() => {
@@ -117,6 +127,9 @@ export default function PropertyDetail() {
           </>
         )}
 
+        {/* Tektal - voice description */}
+        <TektalPlayerMobile propertyId={property.id} />
+
         {/* Contact buttons */}
         <View style={styles.contactSection}>
           {property.users?.phone && (
@@ -141,30 +154,30 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.white },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   imageContainer: { position: 'relative' },
-  image: { width, height: 280 },
-  dots: { position: 'absolute', bottom: 12, left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', gap: 6 },
-  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.5)' },
-  dotActive: { backgroundColor: '#fff', width: 18 },
-  favBtn: { position: 'absolute', top: 12, right: 12, width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.9)', justifyContent: 'center', alignItems: 'center' },
-  content: { padding: 20 },
+  image: { width, height: 240 },
+  dots: { position: 'absolute', bottom: 10, left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', gap: 4 },
+  dot: { width: 5, height: 5, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.5)' },
+  dotActive: { backgroundColor: '#fff', width: 14 },
+  favBtn: { position: 'absolute', top: 10, right: 10, width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(255,255,255,0.9)', justifyContent: 'center', alignItems: 'center' },
+  content: { padding: 16 },
   priceRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  price: { fontSize: 24, fontWeight: '800', color: Colors.orange },
-  badge: { backgroundColor: Colors.green + '20', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
-  badgeText: { fontSize: 12, fontWeight: '700', color: Colors.green },
-  title: { fontSize: 20, fontWeight: '700', color: Colors.slate900, marginTop: 8 },
-  locationRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 6 },
-  location: { fontSize: 13, color: Colors.slate500 },
-  features: { flexDirection: 'row', justifyContent: 'space-around', backgroundColor: Colors.slate50, borderRadius: 14, padding: 16, marginTop: 20 },
-  featureItem: { alignItems: 'center', gap: 4 },
-  featureText: { fontSize: 12, fontWeight: '600', color: Colors.slate700 },
-  sectionTitle: { fontSize: 16, fontWeight: '700', color: Colors.slate900, marginTop: 24, marginBottom: 10 },
-  description: { fontSize: 14, color: Colors.slate600, lineHeight: 22 },
-  tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  tag: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: Colors.slate50, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 },
-  tagText: { fontSize: 12, color: Colors.slate700 },
-  contactSection: { flexDirection: 'row', gap: 12, marginTop: 30, marginBottom: 30 },
-  whatsappBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#25D366', paddingVertical: 16, borderRadius: 14 },
-  whatsappText: { fontSize: 15, fontWeight: '700', color: Colors.white },
-  callBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderWidth: 1.5, borderColor: Colors.orange, paddingVertical: 16, borderRadius: 14 },
-  callText: { fontSize: 15, fontWeight: '700', color: Colors.orange },
+  price: { fontSize: 18, fontWeight: '800', color: Colors.orange },
+  badge: { backgroundColor: Colors.green + '20', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
+  badgeText: { fontSize: 9, fontWeight: '700', color: Colors.green },
+  title: { fontSize: 15, fontWeight: '700', color: Colors.slate900, marginTop: 6 },
+  locationRow: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 4 },
+  location: { fontSize: 11, color: Colors.slate500 },
+  features: { flexDirection: 'row', justifyContent: 'space-around', backgroundColor: Colors.slate50, borderRadius: 12, padding: 12, marginTop: 14 },
+  featureItem: { alignItems: 'center', gap: 3 },
+  featureText: { fontSize: 10, fontWeight: '600', color: Colors.slate700 },
+  sectionTitle: { fontSize: 13, fontWeight: '700', color: Colors.slate900, marginTop: 18, marginBottom: 6 },
+  description: { fontSize: 11, color: Colors.slate600, lineHeight: 18 },
+  tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  tag: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: Colors.slate50, paddingHorizontal: 8, paddingVertical: 5, borderRadius: 6 },
+  tagText: { fontSize: 10, color: Colors.slate700 },
+  contactSection: { flexDirection: 'row', gap: 10, marginTop: 22, marginBottom: 24 },
+  whatsappBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#25D366', paddingVertical: 13, borderRadius: 12 },
+  whatsappText: { fontSize: 12, fontWeight: '700', color: Colors.white },
+  callBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 1.5, borderColor: Colors.orange, paddingVertical: 13, borderRadius: 12 },
+  callText: { fontSize: 12, fontWeight: '700', color: Colors.orange },
 });
