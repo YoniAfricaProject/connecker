@@ -6,8 +6,11 @@ import { Search, Eye, CheckCircle, XCircle, Loader2, ChevronDown } from 'lucide-
 import { Card, Badge, Button } from '@connecker/ui';
 import { formatPrice } from '@connecker/ui';
 import { getSupabase } from '@/lib/supabase';
+import { useAdminAuth } from '@/lib/auth-context';
+import { logAction } from '@/lib/admin-log';
 
 export default function AdminPropertiesPage() {
+  const { user: admin } = useAdminAuth();
   const [properties, setProperties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -34,6 +37,8 @@ export default function AdminPropertiesPage() {
     const supabase = getSupabase();
     await supabase.from('properties').update({ status }).eq('id', id);
     setProperties(properties.map(p => p.id === id ? { ...p, status } : p));
+    const prop = properties.find(p => p.id === id);
+    logAction(admin?.full_name || '', status === 'published' ? 'Approbation annonce' : 'Rejet annonce', 'property', id, prop?.title);
   }
 
   async function deleteProperty(id: string) {
