@@ -83,10 +83,10 @@ export function TektalPlayerMobile({ propertyId }: TektalPlayerMobileProps) {
 
 const styles = StyleSheet.create({
   container: { marginTop: 16 },
-  title: { fontSize: 11, fontWeight: '600', color: Colors.slate900, marginBottom: 6 },
+  title: { fontSize: 14, fontWeight: '600', color: Colors.slate900, marginBottom: 6 },
   player: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: Colors.slate50, borderRadius: 10, padding: 10, borderWidth: 1, borderColor: Colors.slate200 },
   playBtn: { width: 28, height: 28, borderRadius: 14, backgroundColor: Colors.orange, justifyContent: 'center', alignItems: 'center' },
   waveform: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 1.5, height: 16 },
   bar: { width: 2, backgroundColor: Colors.orange, borderRadius: 1 },
-  label: { fontSize: 9, color: Colors.slate500 },
+  label: { fontSize: 12, color: Colors.slate500 },
 });

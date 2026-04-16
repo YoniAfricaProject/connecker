@@ -1,10 +1,13 @@
 import { useState, useCallback } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../lib/auth-context';
 import { supabase } from '../../lib/supabase';
 import { Colors } from '../../lib/colors';
+import { withTimeout } from '../../lib/use-async-data';
+import { DataState } from '../../components/data-state';
 
 function formatPrice(price: number) {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(price);
@@ -15,20 +18,26 @@ export default function ProfileFavoritesPage() {
   const router = useRouter();
   const [properties, setProperties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-  useFocusEffect(
-    useCallback(() => {
-      if (authLoading || !user) { setLoading(false); return; }
-      setLoading(true);
+  const load = useCallback(() => {
+    if (authLoading || !user) { setLoading(false); return; }
+    setLoading(true);
+    setError(null);
+    withTimeout(
       supabase.from('favorites').select('property_id, properties:property_id(*, property_images(*))').eq('user_id', user.id)
-        .then(({ data }) => {
-          setProperties((data || []).map((f: any) => f.properties).filter(Boolean));
-          setLoading(false);
-        });
-    }, [user, authLoading])
-  );
+    )
+      .then(({ data }) => {
+        setProperties((data || []).map((f: any) => f.properties).filter(Boolean));
+        setLoading(false);
+      })
+      .catch((e) => { setError(e instanceof Error ? e : new Error(String(e))); setLoading(false); });
+  }, [user, authLoading]);
+
+  useFocusEffect(useCallback(() => { load(); }, [load]));
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.slate50, paddingTop: 8 }}>
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}><Ionicons name="arrow-back" size={20} color={Colors.slate900} /></TouchableOpacity>
@@ -36,9 +45,8 @@ export default function ProfileFavoritesPage() {
         <View style={{ width: 20 }} />
       </View>
 
-      {loading ? (
-        <ActivityIndicator size="small" color={Colors.orange} style={{ marginTop: 40 }} />
-      ) : properties.length === 0 ? (
+      <DataState loading={loading} error={error} onRetry={load} compact>
+      {properties.length === 0 ? (
         <View style={styles.empty}>
           <Ionicons name="heart-outline" size={36} color={Colors.slate200} />
           <Text style={styles.emptyTitle}>Aucun favori</Text>
@@ -47,7 +55,7 @@ export default function ProfileFavoritesPage() {
       ) : (
         <FlatList
           data={properties}
-          contentContainerStyle={{ padding: 14 }}
+          contentContainerStyle={{ padding: 14, paddingBottom: 20 }}
           renderItem={({ item: p }) => {
             const img = p.property_images?.find((i: any) => i.is_primary) || p.property_images?.[0];
             return (
@@ -64,21 +72,23 @@ export default function ProfileFavoritesPage() {
           keyExtractor={item => item.id}
         />
       )}
+      </DataState>
     </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.slate50 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 56, paddingBottom: 10, backgroundColor: Colors.white },
-  headerTitle: { fontSize: 14, fontWeight: '700', color: Colors.slate900 },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 10, paddingBottom: 10, backgroundColor: Colors.white },
+  headerTitle: { fontSize: 17, fontWeight: '700', color: Colors.slate900 },
   empty: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
-  emptyTitle: { fontSize: 14, fontWeight: '600', color: Colors.slate900, marginTop: 12 },
-  emptySub: { fontSize: 10, color: Colors.slate400, marginTop: 4 },
+  emptyTitle: { fontSize: 17, fontWeight: '600', color: Colors.slate900, marginTop: 12 },
+  emptySub: { fontSize: 13, color: Colors.slate400, marginTop: 4 },
   card: { flexDirection: 'row', backgroundColor: Colors.white, borderRadius: 12, borderWidth: 1, borderColor: Colors.slate100, marginBottom: 10, overflow: 'hidden' },
   image: { width: 100, height: 88 },
   content: { flex: 1, padding: 10, justifyContent: 'center' },
-  price: { fontSize: 13, fontWeight: '800', color: Colors.orange },
-  cardTitle: { fontSize: 11, fontWeight: '600', color: Colors.slate900, marginTop: 2 },
-  city: { fontSize: 10, color: Colors.slate400, marginTop: 2 },
+  price: { fontSize: 16, fontWeight: '800', color: Colors.orange },
+  cardTitle: { fontSize: 14, fontWeight: '600', color: Colors.slate900, marginTop: 2 },
+  city: { fontSize: 13, color: Colors.slate400, marginTop: 2 },
 });

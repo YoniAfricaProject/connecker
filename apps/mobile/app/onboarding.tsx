@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { View, Text, StyleSheet, Dimensions, FlatList, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
@@ -47,6 +48,7 @@ export default function Onboarding() {
   };
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.white, paddingTop: 8 }}>
     <View style={styles.container}>
       <TouchableOpacity style={styles.skip} onPress={handleDone}>
         <Text style={styles.skipText}>Passer</Text>
@@ -86,20 +88,21 @@ export default function Onboarding() {
         <Ionicons name="arrow-forward" size={14} color="#fff" />
       </TouchableOpacity>
     </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.white, paddingBottom: 40 },
-  skip: { position: 'absolute', top: 56, right: 20, zIndex: 10 },
-  skipText: { fontSize: 11, color: Colors.slate500 },
+  skip: { position: 'absolute', top: 10, right: 20, zIndex: 10 },
+  skipText: { fontSize: 14, color: Colors.slate500 },
   slide: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 36 },
   iconCircle: { width: 80, height: 80, borderRadius: 40, justifyContent: 'center', alignItems: 'center', marginBottom: 28 },
-  title: { fontSize: 18, fontWeight: '700', color: Colors.slate900, textAlign: 'center', marginBottom: 10 },
-  description: { fontSize: 12, color: Colors.slate500, textAlign: 'center', lineHeight: 18 },
+  title: { fontSize: 21, fontWeight: '700', color: Colors.slate900, textAlign: 'center', marginBottom: 10 },
+  description: { fontSize: 15, color: Colors.slate500, textAlign: 'center', lineHeight: 21 },
   dots: { flexDirection: 'row', justifyContent: 'center', marginBottom: 20 },
   dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: Colors.slate200, marginHorizontal: 3 },
   dotActive: { backgroundColor: Colors.orange, width: 18 },
   button: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.orange, marginHorizontal: 20, paddingVertical: 13, borderRadius: 12, gap: 6 },
-  buttonText: { fontSize: 13, fontWeight: '600', color: '#fff' },
+  buttonText: { fontSize: 16, fontWeight: '600', color: '#fff' },
 });

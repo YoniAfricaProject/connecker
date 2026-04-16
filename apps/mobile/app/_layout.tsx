@@ -1,11 +1,17 @@
+import { View } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { AuthProvider } from '../lib/auth-context';
+import { I18nProvider } from '../lib/i18n';
+import { OfflineBanner } from '../components/offline-banner';
 
 export default function RootLayout() {
   return (
+    <I18nProvider>
     <AuthProvider>
       <StatusBar style="light" />
+      <View style={{ flex: 1 }}>
+      <OfflineBanner />
       <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
         <Stack.Screen name="splash" options={{ animation: 'none' }} />
         <Stack.Screen name="onboarding" />
@@ -19,6 +25,8 @@ export default function RootLayout() {
         <Stack.Screen name="pages/advertising" />
         <Stack.Screen name="pages/contact" />
       </Stack>
+      </View>
     </AuthProvider>
+    </I18nProvider>
   );
 }

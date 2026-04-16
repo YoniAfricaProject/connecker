@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../lib/colors';
@@ -56,8 +57,9 @@ export default function EstimatePage() {
   };
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.white, paddingTop: 8 }}>
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
@@ -140,40 +142,41 @@ export default function EstimatePage() {
         <View style={{ height: 40 }} />
       </ScrollView>
     </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.white },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 56, paddingBottom: 12 },
-  headerTitle: { fontSize: 15, fontWeight: '700', color: Colors.slate900 },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 10, paddingBottom: 12 },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: Colors.slate900 },
   intro: { flexDirection: 'row', alignItems: 'center', gap: 12, marginHorizontal: 16, padding: 14, backgroundColor: Colors.orangeLight + '20', borderRadius: 12, marginBottom: 10 },
   introIcon: { width: 40, height: 40, borderRadius: 10, backgroundColor: Colors.orangeLight + '40', justifyContent: 'center', alignItems: 'center' },
-  introText: { flex: 1, fontSize: 11, color: Colors.slate600, lineHeight: 16 },
+  introText: { flex: 1, fontSize: 14, color: Colors.slate600, lineHeight: 19 },
   form: { paddingHorizontal: 16, paddingTop: 10 },
-  label: { fontSize: 10, fontWeight: '600', color: Colors.slate500, marginBottom: 6, marginTop: 14, textTransform: 'uppercase', letterSpacing: 0.5 },
+  label: { fontSize: 13, fontWeight: '600', color: Colors.slate500, marginBottom: 6, marginTop: 18, textTransform: 'uppercase', letterSpacing: 0.5 },
   typeRow: { flexDirection: 'row', gap: 10 },
   typeBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 11, borderRadius: 10, borderWidth: 1.5, borderColor: Colors.slate200 },
   typeBtnActive: { borderColor: Colors.orange, backgroundColor: Colors.orangeLight + '20' },
-  typeLabel: { fontSize: 12, fontWeight: '600', color: Colors.slate500 },
+  typeLabel: { fontSize: 15, fontWeight: '600', color: Colors.slate500 },
   typeLabelActive: { color: Colors.orange },
   communeScroll: { marginBottom: 4 },
   communeChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8, backgroundColor: Colors.slate100, marginRight: 6 },
   communeChipActive: { backgroundColor: Colors.orange },
-  communeText: { fontSize: 11, fontWeight: '500', color: Colors.slate600 },
+  communeText: { fontSize: 14, fontWeight: '500', color: Colors.slate600 },
   communeTextActive: { color: Colors.white },
-  input: { borderWidth: 1, borderColor: Colors.slate200, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 11, fontSize: 13, color: Colors.slate900, backgroundColor: Colors.slate50 },
-  calcBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: Colors.orange, paddingVertical: 13, borderRadius: 12, marginTop: 20 },
+  input: { borderWidth: 1, borderColor: Colors.slate200, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 13, fontSize: 16, color: Colors.slate900, backgroundColor: Colors.slate50 },
+  calcBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: Colors.orange, paddingVertical: 13, borderRadius: 12, marginTop: 28 },
   calcBtnDisabled: { opacity: 0.5 },
-  calcBtnText: { fontSize: 13, fontWeight: '600', color: Colors.white },
+  calcBtnText: { fontSize: 16, fontWeight: '600', color: Colors.white },
   resultSection: { marginHorizontal: 16, marginTop: 24 },
-  resultTitle: { fontSize: 15, fontWeight: '700', color: Colors.slate900 },
-  resultSub: { fontSize: 11, color: Colors.slate500, marginTop: 2 },
+  resultTitle: { fontSize: 18, fontWeight: '700', color: Colors.slate900 },
+  resultSub: { fontSize: 14, color: Colors.slate500, marginTop: 2 },
   resultCards: { flexDirection: 'row', gap: 10, marginTop: 14 },
   resultCard: { flex: 1, backgroundColor: Colors.slate50, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: Colors.slate100 },
   resultCardSale: { backgroundColor: Colors.orangeLight + '15', borderColor: Colors.orangeLight },
-  resultLabel: { fontSize: 10, color: Colors.slate500, fontWeight: '500' },
-  resultValue: { fontSize: 18, fontWeight: '800', color: Colors.slate900, marginTop: 4 },
-  resultHint: { fontSize: 9, color: Colors.slate400, marginTop: 2 },
-  disclaimer: { fontSize: 9, color: Colors.slate400, marginTop: 12, fontStyle: 'italic', lineHeight: 14 },
+  resultLabel: { fontSize: 13, color: Colors.slate500, fontWeight: '500' },
+  resultValue: { fontSize: 21, fontWeight: '800', color: Colors.slate900, marginTop: 4 },
+  resultHint: { fontSize: 12, color: Colors.slate400, marginTop: 2 },
+  disclaimer: { fontSize: 12, color: Colors.slate400, marginTop: 12, fontStyle: 'italic', lineHeight: 17 },
 });

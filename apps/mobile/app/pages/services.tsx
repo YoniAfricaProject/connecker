@@ -1,10 +1,13 @@
-import { useEffect, useState } from 'react';
-import { View, Text, FlatList, ScrollView, TextInput, StyleSheet, TouchableOpacity, Linking, ActivityIndicator, Alert } from 'react-native';
+import { useState } from 'react';
+import { View, Text, FlatList, ScrollView, TextInput, StyleSheet, TouchableOpacity, Linking, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../lib/auth-context';
 import { Colors } from '../../lib/colors';
+import { useAsyncData, withTimeout } from '../../lib/use-async-data';
+import { DataState } from '../../components/data-state';
 
 const CATS = ['all', 'Agence', 'Architecte', 'Banque', 'Notaire', 'Promoteur', 'Construction', 'Decorateur', 'Geometre'];
 
@@ -12,31 +15,40 @@ export default function ServicesPage() {
   const router = useRouter();
   const { user } = useAuth();
   const [services, setServices] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState('all');
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: '', category: 'Agence', phone: '', email: '', city: '', description: '' });
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    supabase.from('services').select('*').eq('status', 'active').order('verified', { ascending: false })
-      .then(({ data }) => { setServices(data || []); setLoading(false); });
+  const { loading, error, refetch } = useAsyncData<any[]>(async () => {
+    const { data, error: err } = await supabase.from('services').select('*').eq('status', 'active').order('verified', { ascending: false });
+    if (err) throw err;
+    const list = data || [];
+    setServices(list);
+    return list;
   }, []);
 
   const handleSubmit = async () => {
     if (!form.name || !form.phone) { Alert.alert('Erreur', 'Nom et telephone requis'); return; }
     setSubmitting(true);
-    const { data } = await supabase.from('services').insert({ ...form, status: 'active', verified: false }).select().single();
-    if (data) setServices([data, ...services]);
-    setSubmitting(false);
-    setShowForm(false);
-    setForm({ name: '', category: 'Agence', phone: '', email: '', city: '', description: '' });
-    Alert.alert('Publie !', 'Votre service est en ligne. Il sera verifie par notre equipe.');
+    try {
+      const { data, error: err } = await withTimeout(supabase.from('services').insert({ ...form, status: 'active', verified: false }).select().single());
+      if (err) throw err;
+      if (data) setServices([data, ...services]);
+      setShowForm(false);
+      setForm({ name: '', category: 'Agence', phone: '', email: '', city: '', description: '' });
+      Alert.alert('Publie !', 'Votre service est en ligne. Il sera verifie par notre equipe.');
+    } catch (e: any) {
+      Alert.alert('Erreur', e.message || 'Une erreur est survenue');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const filtered = category === 'all' ? services : services.filter(s => s.category === category);
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.slate50, paddingTop: 8 }}>
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}><Ionicons name="arrow-back" size={20} color={Colors.slate900} /></TouchableOpacity>
@@ -78,7 +90,7 @@ export default function ServicesPage() {
             ))}
           </View>
 
-          {loading ? <ActivityIndicator size="small" color={Colors.orange} style={{ marginTop: 40 }} /> : (
+          <DataState loading={loading} error={error} onRetry={refetch} compact>
             <FlatList
               data={filtered}
               contentContainerStyle={{ padding: 14 }}
@@ -103,7 +115,7 @@ export default function ServicesPage() {
               keyExtractor={item => item.id}
               ListEmptyComponent={<Text style={styles.empty}>{services.length === 0 ? 'Bientot disponible' : 'Aucun resultat'}</Text>}
             />
-          )}
+          </DataState>
 
           {!user && (
             <View style={styles.ctaBar}>
@@ -116,39 +128,40 @@ export default function ServicesPage() {
         </>
       )}
     </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.slate50 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 56, paddingBottom: 10, backgroundColor: Colors.white },
-  headerTitle: { fontSize: 14, fontWeight: '700', color: Colors.slate900 },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 10, paddingBottom: 10, backgroundColor: Colors.white },
+  headerTitle: { fontSize: 17, fontWeight: '700', color: Colors.slate900 },
   formCard: { backgroundColor: Colors.white, maxHeight: 400 },
-  formTitle: { fontSize: 13, fontWeight: '700', color: Colors.slate900, marginBottom: 10 },
-  input: { borderWidth: 1, borderColor: Colors.slate200, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 9, fontSize: 12, color: Colors.slate900, backgroundColor: Colors.slate50, marginBottom: 8 },
+  formTitle: { fontSize: 16, fontWeight: '700', color: Colors.slate900, marginBottom: 10 },
+  input: { borderWidth: 1, borderColor: Colors.slate200, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 9, fontSize: 15, color: Colors.slate900, backgroundColor: Colors.slate50, marginBottom: 8 },
   catRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginBottom: 8 },
   catChip: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 7, backgroundColor: Colors.slate100 },
   catChipActive: { backgroundColor: Colors.orange },
-  catText: { fontSize: 10, fontWeight: '500', color: Colors.slate600 },
+  catText: { fontSize: 13, fontWeight: '500', color: Colors.slate600 },
   catTextActive: { color: Colors.white },
   submitBtn: { backgroundColor: Colors.orange, paddingVertical: 11, borderRadius: 10, alignItems: 'center', marginTop: 4 },
-  submitText: { fontSize: 12, fontWeight: '600', color: Colors.white },
+  submitText: { fontSize: 15, fontWeight: '600', color: Colors.white },
   filterWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 5, paddingHorizontal: 14, paddingVertical: 8, backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: Colors.slate100 },
   filterChip: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, backgroundColor: Colors.slate100 },
   filterChipActive: { backgroundColor: Colors.orange },
-  filterText: { fontSize: 9, fontWeight: '500', color: Colors.slate600 },
+  filterText: { fontSize: 12, fontWeight: '500', color: Colors.slate600 },
   filterTextActive: { color: Colors.white },
   card: { flexDirection: 'row', backgroundColor: Colors.white, padding: 12, borderRadius: 12, marginBottom: 8, gap: 10, alignItems: 'center' },
   cardIcon: { width: 34, height: 34, borderRadius: 10, backgroundColor: Colors.orangeLight + '30', justifyContent: 'center', alignItems: 'center' },
-  cardInitial: { fontSize: 13, fontWeight: '700', color: Colors.orange },
+  cardInitial: { fontSize: 16, fontWeight: '700', color: Colors.orange },
   cardContent: { flex: 1 },
-  cardName: { fontSize: 12, fontWeight: '600', color: Colors.slate900 },
-  cardCat: { fontSize: 9, color: Colors.orange, marginTop: 1 },
-  cardCity: { fontSize: 9, color: Colors.slate400, marginTop: 1 },
+  cardName: { fontSize: 15, fontWeight: '600', color: Colors.slate900 },
+  cardCat: { fontSize: 12, color: Colors.orange, marginTop: 1 },
+  cardCity: { fontSize: 12, color: Colors.slate400, marginTop: 1 },
   callBtn: { width: 30, height: 30, borderRadius: 8, borderWidth: 1, borderColor: Colors.orange + '30', justifyContent: 'center', alignItems: 'center' },
-  empty: { textAlign: 'center', color: Colors.slate400, marginTop: 40, fontSize: 11 },
+  empty: { textAlign: 'center', color: Colors.slate400, marginTop: 40, fontSize: 14 },
   ctaBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: Colors.white, paddingHorizontal: 14, paddingVertical: 10, borderTopWidth: 1, borderTopColor: Colors.slate100 },
-  ctaText: { fontSize: 10, color: Colors.slate500, flex: 1 },
+  ctaText: { fontSize: 13, color: Colors.slate500, flex: 1 },
   ctaBtn: { backgroundColor: Colors.orange, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8 },
-  ctaBtnText: { fontSize: 10, fontWeight: '600', color: Colors.white },
+  ctaBtnText: { fontSize: 13, fontWeight: '600', color: Colors.white },
 });

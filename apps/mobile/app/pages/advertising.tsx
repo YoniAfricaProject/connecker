@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Linking, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../lib/auth-context';
 import { Colors } from '../../lib/colors';
+import { withTimeout } from '../../lib/use-async-data';
 
 const PACKS = [
   { name: 'Standard', price: '50 000 F/mois', features: ['Annonce en avant 7j', 'Badge Recommande', 'Support email'] },
@@ -23,19 +25,23 @@ export default function AdvertisingPage() {
   const handleDevis = async () => {
     if (!form.name || !form.email) { Alert.alert('Erreur', 'Nom et email requis'); return; }
 
-    // Save as a lead in Supabase for the BO team
-    await supabase.from('leads').insert({
-      property_id: null as any,
-      sender_name: form.name,
-      sender_email: form.email,
-      sender_phone: form.phone || null,
-      message: `[DEVIS PUB - ${selectedPack}] Entreprise: ${form.company}. ${form.message}`,
-    });
-
-    setSent(true);
+    try {
+      // Save as a lead in Supabase for the BO team
+      await withTimeout(supabase.from('leads').insert({
+        property_id: null as any,
+        sender_name: form.name,
+        sender_email: form.email,
+        sender_phone: form.phone || null,
+        message: `[DEVIS PUB - ${selectedPack}] Entreprise: ${form.company}. ${form.message}`,
+      }));
+      setSent(true);
+    } catch (err: any) {
+      Alert.alert('Erreur', err.message || 'Une erreur est survenue');
+    }
   };
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.slate50, paddingTop: 8 }}>
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => { if (showDevis) { setShowDevis(false); } else router.back(); }}>
@@ -45,7 +51,7 @@ export default function AdvertisingPage() {
         <View style={{ width: 20 }} />
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 14 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 14, paddingBottom: 20 }}>
         {sent ? (
           <View style={styles.sentCard}>
             <Ionicons name="checkmark-circle" size={40} color={Colors.green} />
@@ -112,38 +118,39 @@ export default function AdvertisingPage() {
         <View style={{ height: 30 }} />
       </ScrollView>
     </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.slate50 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 56, paddingBottom: 10, backgroundColor: Colors.white },
-  headerTitle: { fontSize: 14, fontWeight: '700', color: Colors.slate900 },
-  title: { fontSize: 15, fontWeight: '800', color: Colors.slate900, marginTop: 4 },
-  sub: { fontSize: 10, color: Colors.slate500, marginTop: 4, marginBottom: 14, lineHeight: 15 },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 10, paddingBottom: 10, backgroundColor: Colors.white },
+  headerTitle: { fontSize: 17, fontWeight: '700', color: Colors.slate900 },
+  title: { fontSize: 18, fontWeight: '800', color: Colors.slate900, marginTop: 4 },
+  sub: { fontSize: 13, color: Colors.slate500, marginTop: 4, marginBottom: 14, lineHeight: 18 },
   packCard: { backgroundColor: Colors.white, borderRadius: 14, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: Colors.slate100 },
   packPopular: { borderColor: Colors.orange, borderWidth: 1.5 },
   popularBadge: { position: 'absolute', top: -8, right: 12, backgroundColor: Colors.orange, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 5 },
-  popularText: { fontSize: 8, fontWeight: '700', color: Colors.white },
-  packName: { fontSize: 13, fontWeight: '700', color: Colors.slate900 },
-  packPrice: { fontSize: 16, fontWeight: '800', color: Colors.orange, marginTop: 3 },
+  popularText: { fontSize: 11, fontWeight: '700', color: Colors.white },
+  packName: { fontSize: 16, fontWeight: '700', color: Colors.slate900 },
+  packPrice: { fontSize: 19, fontWeight: '800', color: Colors.orange, marginTop: 3 },
   packFeatures: { marginTop: 10, gap: 5 },
   packFeature: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  packFeatureText: { fontSize: 10, color: Colors.slate600 },
+  packFeatureText: { fontSize: 13, color: Colors.slate600 },
   packBtn: { marginTop: 12, paddingVertical: 10, borderRadius: 10, borderWidth: 1, borderColor: Colors.slate200, alignItems: 'center' },
   packBtnPopular: { backgroundColor: Colors.orange, borderColor: Colors.orange },
-  packBtnText: { fontSize: 11, fontWeight: '600', color: Colors.slate700 },
+  packBtnText: { fontSize: 14, fontWeight: '600', color: Colors.slate700 },
   packBtnTextPopular: { color: Colors.white },
   waBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#25D366', paddingVertical: 12, borderRadius: 12, marginTop: 8 },
-  waBtnText: { fontSize: 11, fontWeight: '600', color: Colors.white },
+  waBtnText: { fontSize: 14, fontWeight: '600', color: Colors.white },
   devisInfo: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: Colors.orangeLight + '20', padding: 12, borderRadius: 10, marginBottom: 12 },
-  devisInfoText: { fontSize: 11, color: Colors.slate700 },
-  input: { borderWidth: 1, borderColor: Colors.slate200, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 9, fontSize: 12, color: Colors.slate900, backgroundColor: Colors.white, marginBottom: 8 },
+  devisInfoText: { fontSize: 14, color: Colors.slate700 },
+  input: { borderWidth: 1, borderColor: Colors.slate200, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 9, fontSize: 15, color: Colors.slate900, backgroundColor: Colors.white, marginBottom: 8 },
   submitBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: Colors.orange, paddingVertical: 12, borderRadius: 12, marginTop: 4 },
-  submitText: { fontSize: 12, fontWeight: '600', color: Colors.white },
+  submitText: { fontSize: 15, fontWeight: '600', color: Colors.white },
   sentCard: { alignItems: 'center', paddingVertical: 40 },
-  sentTitle: { fontSize: 16, fontWeight: '700', color: Colors.slate900, marginTop: 12 },
-  sentSub: { fontSize: 11, color: Colors.slate500, textAlign: 'center', marginTop: 6, lineHeight: 16 },
+  sentTitle: { fontSize: 19, fontWeight: '700', color: Colors.slate900, marginTop: 12 },
+  sentSub: { fontSize: 14, color: Colors.slate500, textAlign: 'center', marginTop: 6, lineHeight: 19 },
   sentBtn: { backgroundColor: Colors.orange, paddingHorizontal: 24, paddingVertical: 10, borderRadius: 10, marginTop: 16 },
-  sentBtnText: { fontSize: 12, fontWeight: '600', color: Colors.white },
+  sentBtnText: { fontSize: 15, fontWeight: '600', color: Colors.white },
 });

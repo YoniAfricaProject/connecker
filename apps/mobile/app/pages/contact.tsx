@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Linking, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../lib/colors';
@@ -18,6 +19,7 @@ export default function ContactPage() {
   };
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.slate50, paddingTop: 8 }}>
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}><Ionicons name="arrow-back" size={20} color={Colors.slate900} /></TouchableOpacity>
@@ -25,7 +27,7 @@ export default function ContactPage() {
         <View style={{ width: 20 }} />
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16, paddingBottom: 20 }}>
         {/* Quick contact */}
         <View style={styles.quickRow}>
           <TouchableOpacity style={styles.quickBtn} onPress={() => Linking.openURL('tel:+33754832723')}>
@@ -79,28 +81,29 @@ export default function ContactPage() {
         <View style={{ height: 30 }} />
       </ScrollView>
     </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.slate50 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 56, paddingBottom: 10, backgroundColor: Colors.white },
-  headerTitle: { fontSize: 14, fontWeight: '700', color: Colors.slate900 },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 10, paddingBottom: 10, backgroundColor: Colors.white },
+  headerTitle: { fontSize: 17, fontWeight: '700', color: Colors.slate900 },
   quickRow: { flexDirection: 'row', gap: 8, marginBottom: 14 },
   quickBtn: { flex: 1, alignItems: 'center', gap: 4, paddingVertical: 14, borderRadius: 12, backgroundColor: Colors.white, borderWidth: 1, borderColor: Colors.slate100 },
-  quickText: { fontSize: 10, fontWeight: '600', color: Colors.slate700 },
+  quickText: { fontSize: 13, fontWeight: '600', color: Colors.slate700 },
   infoCard: { backgroundColor: Colors.white, borderRadius: 12, padding: 14, marginBottom: 14, gap: 10 },
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  infoText: { fontSize: 11, color: Colors.slate700 },
+  infoText: { fontSize: 14, color: Colors.slate700 },
   formCard: { backgroundColor: Colors.white, borderRadius: 12, padding: 14 },
-  formTitle: { fontSize: 13, fontWeight: '700', color: Colors.slate900, marginBottom: 10 },
-  label: { fontSize: 10, fontWeight: '600', color: Colors.slate500, marginBottom: 4, marginTop: 10, textTransform: 'uppercase', letterSpacing: 0.5 },
-  input: { borderWidth: 1, borderColor: Colors.slate200, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 12, color: Colors.slate900, backgroundColor: Colors.slate50 },
+  formTitle: { fontSize: 16, fontWeight: '700', color: Colors.slate900, marginBottom: 10 },
+  label: { fontSize: 13, fontWeight: '600', color: Colors.slate500, marginBottom: 4, marginTop: 10, textTransform: 'uppercase', letterSpacing: 0.5 },
+  input: { borderWidth: 1, borderColor: Colors.slate200, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 15, color: Colors.slate900, backgroundColor: Colors.slate50 },
   sendBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: Colors.orange, paddingVertical: 12, borderRadius: 12, marginTop: 14 },
-  sendBtnText: { fontSize: 12, fontWeight: '600', color: Colors.white },
+  sendBtnText: { fontSize: 15, fontWeight: '600', color: Colors.white },
   sentCard: { backgroundColor: Colors.white, borderRadius: 12, padding: 24, alignItems: 'center' },
-  sentTitle: { fontSize: 15, fontWeight: '700', color: Colors.slate900, marginTop: 10 },
-  sentSub: { fontSize: 10, color: Colors.slate500, marginTop: 4 },
+  sentTitle: { fontSize: 18, fontWeight: '700', color: Colors.slate900, marginTop: 10 },
+  sentSub: { fontSize: 13, color: Colors.slate500, marginTop: 4 },
   sentBtn: { backgroundColor: Colors.orange, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10, marginTop: 14 },
-  sentBtnText: { fontSize: 11, fontWeight: '600', color: Colors.white },
+  sentBtnText: { fontSize: 14, fontWeight: '600', color: Colors.white },
 });

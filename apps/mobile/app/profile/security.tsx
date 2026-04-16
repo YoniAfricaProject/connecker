@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../lib/auth-context';
 import { supabase } from '../../lib/supabase';
 import { Colors } from '../../lib/colors';
+import { withTimeout } from '../../lib/use-async-data';
 
 export default function SecurityPage() {
   const router = useRouter();
@@ -19,12 +21,16 @@ export default function SecurityPage() {
     if (newPassword.length < 6) { setError('Minimum 6 caracteres'); return; }
     if (newPassword !== confirmPassword) { setError('Les mots de passe ne correspondent pas'); return; }
 
-    const { error: err } = await supabase.auth.updateUser({ password: newPassword });
-    if (err) { setError(err.message); return; }
-    setSaved(true);
-    setNewPassword('');
-    setConfirmPassword('');
-    setTimeout(() => setSaved(false), 3000);
+    try {
+      const { error: err } = await withTimeout(supabase.auth.updateUser({ password: newPassword }));
+      if (err) { setError(err.message); return; }
+      setSaved(true);
+      setNewPassword('');
+      setConfirmPassword('');
+      setTimeout(() => setSaved(false), 3000);
+    } catch (e: any) {
+      setError(e.message || 'Une erreur est survenue');
+    }
   };
 
   const handleDeleteAccount = () => {
@@ -35,8 +41,12 @@ export default function SecurityPage() {
         { text: 'Annuler', style: 'cancel' },
         { text: 'Supprimer', style: 'destructive', onPress: async () => {
           if (user) {
-            await supabase.from('users').delete().eq('id', user.id);
-            await signOut();
+            try {
+              await withTimeout(supabase.from('users').delete().eq('id', user.id));
+              await signOut();
+            } catch (e: any) {
+              Alert.alert('Erreur', e.message || 'Impossible de supprimer le compte');
+            }
           }
         }},
       ]
@@ -44,8 +54,9 @@ export default function SecurityPage() {
   };
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.white, paddingTop: 8 }}>
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}><Ionicons name="arrow-back" size={20} color={Colors.slate900} /></TouchableOpacity>
           <Text style={styles.headerTitle}>Connexion & securite</Text>
@@ -89,23 +100,24 @@ export default function SecurityPage() {
         <View style={{ height: 40 }} />
       </ScrollView>
     </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.white },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 56, paddingBottom: 10 },
-  headerTitle: { fontSize: 14, fontWeight: '700', color: Colors.slate900 },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 10, paddingBottom: 10 },
+  headerTitle: { fontSize: 17, fontWeight: '700', color: Colors.slate900 },
   section: { paddingHorizontal: 16, marginTop: 20 },
-  sectionTitle: { fontSize: 12, fontWeight: '700', color: Colors.slate900, marginBottom: 10 },
+  sectionTitle: { fontSize: 15, fontWeight: '700', color: Colors.slate900, marginBottom: 10 },
   readOnly: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: Colors.slate50, padding: 12, borderRadius: 10, borderWidth: 1, borderColor: Colors.slate100 },
-  readOnlyText: { flex: 1, fontSize: 12, color: Colors.slate500 },
-  label: { fontSize: 10, fontWeight: '600', color: Colors.slate500, marginBottom: 5, marginTop: 12, textTransform: 'uppercase', letterSpacing: 0.5 },
-  input: { borderWidth: 1, borderColor: Colors.slate200, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 12, color: Colors.slate900, backgroundColor: Colors.slate50 },
-  error: { fontSize: 10, color: Colors.red, marginBottom: 6, backgroundColor: '#fef2f2', padding: 8, borderRadius: 8 },
+  readOnlyText: { flex: 1, fontSize: 15, color: Colors.slate500 },
+  label: { fontSize: 13, fontWeight: '600', color: Colors.slate500, marginBottom: 5, marginTop: 16, textTransform: 'uppercase', letterSpacing: 0.5 },
+  input: { borderWidth: 1, borderColor: Colors.slate200, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 12, fontSize: 15, color: Colors.slate900, backgroundColor: Colors.slate50 },
+  error: { fontSize: 13, color: Colors.red, marginBottom: 6, backgroundColor: '#fef2f2', padding: 8, borderRadius: 8 },
   saveBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5, backgroundColor: Colors.orange, paddingVertical: 12, borderRadius: 12, marginTop: 16 },
-  saveBtnText: { fontSize: 12, fontWeight: '600', color: Colors.white },
+  saveBtnText: { fontSize: 15, fontWeight: '600', color: Colors.white },
   deleteBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5, borderWidth: 1, borderColor: Colors.red + '30', paddingVertical: 12, borderRadius: 12 },
-  deleteBtnText: { fontSize: 12, fontWeight: '600', color: Colors.red },
-  deleteHint: { fontSize: 9, color: Colors.slate400, textAlign: 'center', marginTop: 6 },
+  deleteBtnText: { fontSize: 15, fontWeight: '600', color: Colors.red },
+  deleteHint: { fontSize: 12, color: Colors.slate400, textAlign: 'center', marginTop: 6 },
 });

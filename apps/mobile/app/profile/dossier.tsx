@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 // Document picker - using alert for now
@@ -59,8 +60,9 @@ export default function DossierPage() {
   const progress = totalDocs > 0 ? (completedDocs / totalDocs) * 100 : 0;
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.white, paddingTop: 8 }}>
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}><Ionicons name="arrow-back" size={20} color={Colors.slate900} /></TouchableOpacity>
           <Text style={styles.headerTitle}>Mon dossier</Text>
@@ -153,42 +155,43 @@ export default function DossierPage() {
         <View style={{ height: 40 }} />
       </ScrollView>
     </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.white },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 56, paddingBottom: 10 },
-  headerTitle: { fontSize: 14, fontWeight: '700', color: Colors.slate900 },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 10, paddingBottom: 10 },
+  headerTitle: { fontSize: 17, fontWeight: '700', color: Colors.slate900 },
   info: { flexDirection: 'row', alignItems: 'center', gap: 8, marginHorizontal: 16, padding: 12, backgroundColor: Colors.orangeLight + '20', borderRadius: 10, marginBottom: 6 },
-  infoText: { flex: 1, fontSize: 10, color: Colors.slate600, lineHeight: 15 },
+  infoText: { flex: 1, fontSize: 13, color: Colors.slate600, lineHeight: 18 },
   progressSection: { marginHorizontal: 16, marginTop: 10, marginBottom: 6 },
   progressHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-  progressLabel: { fontSize: 11, fontWeight: '600', color: Colors.slate900 },
-  progressCount: { fontSize: 10, color: Colors.slate400 },
+  progressLabel: { fontSize: 14, fontWeight: '600', color: Colors.slate900 },
+  progressCount: { fontSize: 13, color: Colors.slate400 },
   progressBar: { height: 4, backgroundColor: Colors.slate100, borderRadius: 2, overflow: 'hidden' },
   progressFill: { height: '100%', backgroundColor: Colors.orange, borderRadius: 2 },
   form: { paddingHorizontal: 16, marginTop: 10 },
-  sectionTitle: { fontSize: 12, fontWeight: '700', color: Colors.slate900, marginBottom: 8, marginTop: 6 },
-  label: { fontSize: 10, fontWeight: '600', color: Colors.slate500, marginBottom: 5, marginTop: 12, textTransform: 'uppercase', letterSpacing: 0.5 },
-  input: { borderWidth: 1, borderColor: Colors.slate200, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 12, color: Colors.slate900, backgroundColor: Colors.slate50 },
+  sectionTitle: { fontSize: 15, fontWeight: '700', color: Colors.slate900, marginBottom: 8, marginTop: 6 },
+  label: { fontSize: 13, fontWeight: '600', color: Colors.slate500, marginBottom: 5, marginTop: 12, textTransform: 'uppercase', letterSpacing: 0.5 },
+  input: { borderWidth: 1, borderColor: Colors.slate200, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 15, color: Colors.slate900, backgroundColor: Colors.slate50 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   chip: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 8, backgroundColor: Colors.slate100 },
   chipActive: { backgroundColor: Colors.orange },
-  chipText: { fontSize: 10, fontWeight: '500', color: Colors.slate600 },
+  chipText: { fontSize: 13, fontWeight: '500', color: Colors.slate600 },
   chipTextActive: { color: Colors.white },
-  docHint: { fontSize: 9, color: Colors.slate400, marginBottom: 10 },
+  docHint: { fontSize: 12, color: Colors.slate400, marginBottom: 10 },
   docItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: Colors.slate50 },
   docLeft: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 },
   docIcon: { width: 28, height: 28, borderRadius: 8, backgroundColor: Colors.slate100, justifyContent: 'center', alignItems: 'center' },
   docIconDone: { backgroundColor: Colors.green },
   docInfo: { flex: 1 },
-  docLabel: { fontSize: 11, fontWeight: '600', color: Colors.slate900 },
-  docDesc: { fontSize: 9, color: Colors.slate400, marginTop: 1 },
-  docName: { fontSize: 9, color: Colors.green, marginTop: 1 },
+  docLabel: { fontSize: 14, fontWeight: '600', color: Colors.slate900 },
+  docDesc: { fontSize: 12, color: Colors.slate400, marginTop: 1 },
+  docName: { fontSize: 12, color: Colors.green, marginTop: 1 },
   docUploadBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: Colors.orange + '30' },
-  docUploadText: { fontSize: 10, fontWeight: '500', color: Colors.orange },
+  docUploadText: { fontSize: 13, fontWeight: '500', color: Colors.orange },
   docRemoveBtn: { width: 24, height: 24, borderRadius: 12, backgroundColor: Colors.red + '10', justifyContent: 'center', alignItems: 'center' },
   saveBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5, backgroundColor: Colors.orange, paddingVertical: 12, borderRadius: 12, marginTop: 16 },
-  saveBtnText: { fontSize: 12, fontWeight: '600', color: Colors.white },
+  saveBtnText: { fontSize: 15, fontWeight: '600', color: Colors.white },
 });

@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../lib/auth-context';
 import { supabase } from '../../lib/supabase';
 import { Colors } from '../../lib/colors';
+import { withTimeout } from '../../lib/use-async-data';
 
 export default function EditProfile() {
   const { user } = useAuth();
@@ -26,19 +28,25 @@ export default function EditProfile() {
   const handleSave = async () => {
     if (!user) return;
     setSaving(true);
-    await supabase.from('users').update({
-      full_name: form.full_name,
-      phone: form.phone || null,
-      company_name: form.company_name || null,
-    }).eq('id', user.id);
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    try {
+      await withTimeout(supabase.from('users').update({
+        full_name: form.full_name,
+        phone: form.phone || null,
+        company_name: form.company_name || null,
+      }).eq('id', user.id));
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (err: any) {
+      Alert.alert('Erreur', err.message || 'Une erreur est survenue');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.white, paddingTop: 8 }}>
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
@@ -105,23 +113,24 @@ export default function EditProfile() {
         <View style={{ height: 40 }} />
       </ScrollView>
     </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.white },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 56, paddingBottom: 12 },
-  headerTitle: { fontSize: 15, fontWeight: '700', color: Colors.slate900 },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 10, paddingBottom: 12 },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: Colors.slate900 },
   avatarSection: { alignItems: 'center', paddingVertical: 20 },
   avatar: { width: 64, height: 64, borderRadius: 32, backgroundColor: Colors.orange, justifyContent: 'center', alignItems: 'center' },
-  avatarText: { fontSize: 22, fontWeight: '700', color: Colors.white },
-  avatarHint: { fontSize: 11, color: Colors.orange, fontWeight: '500', marginTop: 8 },
+  avatarText: { fontSize: 25, fontWeight: '700', color: Colors.white },
+  avatarHint: { fontSize: 14, color: Colors.orange, fontWeight: '500', marginTop: 8 },
   form: { paddingHorizontal: 20 },
-  field: { marginBottom: 16 },
-  label: { fontSize: 11, fontWeight: '600', color: Colors.slate500, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 },
-  input: { borderWidth: 1, borderColor: Colors.slate200, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12, fontSize: 14, color: Colors.slate900, backgroundColor: Colors.slate50 },
+  field: { marginBottom: 20 },
+  label: { fontSize: 14, fontWeight: '600', color: Colors.slate500, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 },
+  input: { borderWidth: 1, borderColor: Colors.slate200, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 14, fontSize: 17, color: Colors.slate900, backgroundColor: Colors.slate50 },
   inputDisabled: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderColor: Colors.slate100, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: Colors.slate50 },
-  inputDisabledText: { fontSize: 14, color: Colors.slate400 },
+  inputDisabledText: { fontSize: 17, color: Colors.slate400 },
   saveBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: Colors.orange, marginHorizontal: 20, paddingVertical: 14, borderRadius: 12, marginTop: 10 },
-  saveBtnText: { fontSize: 14, fontWeight: '600', color: Colors.white },
+  saveBtnText: { fontSize: 17, fontWeight: '600', color: Colors.white },
 });
