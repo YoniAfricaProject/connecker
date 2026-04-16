@@ -39,21 +39,30 @@ function SearchPageContent() {
     transactionType: searchParams.get('type') || '',
     city: searchParams.get('city') || searchParams.get('q') || '',
     district: searchParams.get('district') || '',
-    priceMin: '',
-    priceMax: '',
-    surfaceMin: '',
-    bedroomsMin: '',
+    priceMin: searchParams.get('price_min') || '',
+    priceMax: searchParams.get('price_max') || '',
+    surfaceMin: searchParams.get('surface_min') || '',
+    surfaceMax: searchParams.get('surface_max') || '',
+    roomsMin: searchParams.get('rooms_min') || '',
+    bedroomsMin: searchParams.get('bedrooms_min') || '',
+    features: (searchParams.get('features') || '').split(',').filter(Boolean),
   });
 
   // Re-sync filters when URL params change
   useEffect(() => {
-    setFilters(f => ({
-      ...f,
-      propertyType: searchParams.get('property_type') || f.propertyType,
+    setFilters({
+      propertyType: searchParams.get('property_type') || '',
       transactionType: searchParams.get('type') || '',
-      city: searchParams.get('city') || searchParams.get('q') || f.city,
-      district: searchParams.get('district') || f.district,
-    }));
+      city: searchParams.get('city') || searchParams.get('q') || '',
+      district: searchParams.get('district') || '',
+      priceMin: searchParams.get('price_min') || '',
+      priceMax: searchParams.get('price_max') || '',
+      surfaceMin: searchParams.get('surface_min') || '',
+      surfaceMax: searchParams.get('surface_max') || '',
+      roomsMin: searchParams.get('rooms_min') || '',
+      bedroomsMin: searchParams.get('bedrooms_min') || '',
+      features: (searchParams.get('features') || '').split(',').filter(Boolean),
+    });
     setPage(1);
   }, [searchParams]);
 
@@ -72,7 +81,10 @@ function SearchPageContent() {
     if (filters.priceMin) query = query.gte('price', Number(filters.priceMin));
     if (filters.priceMax) query = query.lte('price', Number(filters.priceMax));
     if (filters.surfaceMin) query = query.gte('surface_area', Number(filters.surfaceMin));
+    if (filters.surfaceMax) query = query.lte('surface_area', Number(filters.surfaceMax));
+    if (filters.roomsMin) query = query.gte('rooms', Number(filters.roomsMin));
     if (filters.bedroomsMin) query = query.gte('bedrooms', Number(filters.bedroomsMin));
+    if (filters.features.length > 0) query = query.contains('features', filters.features);
 
     const sortMap: Record<string, [string, { ascending: boolean }]> = {
       price_asc: ['price', { ascending: true }],
@@ -182,9 +194,22 @@ function SearchPageContent() {
                 className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Surface min (m2)</label>
-              <input type="number" placeholder="Min m2" value={filters.surfaceMin} onChange={e => setFilters(f => ({ ...f, surfaceMin: e.target.value }))}
+              <label className="block text-sm font-medium text-slate-700 mb-2">Surface min (m²)</label>
+              <input type="number" placeholder="Min m²" value={filters.surfaceMin} onChange={e => setFilters(f => ({ ...f, surfaceMin: e.target.value }))}
                 className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Surface max (m²)</label>
+              <input type="number" placeholder="Max m²" value={filters.surfaceMax} onChange={e => setFilters(f => ({ ...f, surfaceMax: e.target.value }))}
+                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Pièces min</label>
+              <select value={filters.roomsMin} onChange={e => setFilters(f => ({ ...f, roomsMin: e.target.value }))}
+                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                <option value="">Peu importe</option>
+                <option value="1">1+</option><option value="2">2+</option><option value="3">3+</option><option value="4">4+</option><option value="5">5+</option>
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">Chambres min</label>
@@ -195,8 +220,25 @@ function SearchPageContent() {
               </select>
             </div>
           </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Équipements</label>
+            <div className="flex flex-wrap gap-2">
+              {['Piscine','Jardin','Garage','Climatisation','Ascenseur','Balcon','Terrasse','Gardien','Parking','Vue mer','Meuble','Wifi','Cuisine equipee','Titre foncier'].map(f => {
+                const active = filters.features.includes(f);
+                return (
+                  <button key={f} type="button"
+                    onClick={() => setFilters(prev => ({ ...prev, features: active ? prev.features.filter(x => x !== f) : [...prev.features, f] }))}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${active ? 'border-orange-500 bg-orange-50 text-orange-600' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}`}>
+                    {f}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="flex justify-end gap-3">
-            <Button variant="ghost" size="sm" onClick={() => { setFilters({ propertyType: '', transactionType: '', city: '', district: '', priceMin: '', priceMax: '', surfaceMin: '', bedroomsMin: '' }); setPage(1); }}>Reinitialiser</Button>
+            <Button variant="ghost" size="sm" onClick={() => { setFilters({ propertyType: '', transactionType: '', city: '', district: '', priceMin: '', priceMax: '', surfaceMin: '', surfaceMax: '', roomsMin: '', bedroomsMin: '', features: [] }); setPage(1); }}>Réinitialiser</Button>
             <Button variant="primary" size="sm" onClick={() => { setPage(1); fetchProperties(); }}>Appliquer</Button>
           </div>
         </div>
@@ -210,8 +252,8 @@ function SearchPageContent() {
       ) : properties.length === 0 ? (
         <div className="text-center py-20">
           <p className="text-lg text-slate-500">Aucun bien trouve pour ces criteres.</p>
-          <Button variant="outline" className="mt-4" onClick={() => { setFilters({ propertyType: '', transactionType: '', city: '', district: '', priceMin: '', priceMax: '', surfaceMin: '', bedroomsMin: '' }); setPage(1); }}>
-            Reinitialiser les filtres
+          <Button variant="outline" className="mt-4" onClick={() => { setFilters({ propertyType: '', transactionType: '', city: '', district: '', priceMin: '', priceMax: '', surfaceMin: '', surfaceMax: '', roomsMin: '', bedroomsMin: '', features: [] }); setPage(1); }}>
+            Réinitialiser les filtres
           </Button>
         </div>
       ) : (

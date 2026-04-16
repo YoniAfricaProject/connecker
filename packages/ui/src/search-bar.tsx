@@ -1,16 +1,25 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Search, MapPin, SlidersHorizontal, Building2, ChevronDown, X, BedDouble, Maximize, Banknote } from 'lucide-react';
+import { Search, MapPin, SlidersHorizontal, Building2, ChevronDown, X, BedDouble, Maximize, Banknote, Home as HomeIcon } from 'lucide-react';
 import { cn } from './utils';
 import { Button } from './button';
 import { DAKAR_COMMUNES, OTHER_CITIES, PROPERTY_TYPE_OPTIONS } from './dakar-data';
+
+export const FEATURE_OPTIONS = [
+  'Piscine', 'Jardin', 'Garage', 'Climatisation', 'Ascenseur',
+  'Balcon', 'Terrasse', 'Gardien', 'Parking', 'Vue mer',
+  'Meuble', 'Wifi', 'Cuisine equipee', 'Titre foncier',
+];
 
 interface SearchBarProps {
   onSearch?: (filters: {
     query: string; city: string; district: string;
     transaction_type: string; property_type: string;
-    price_min: string; price_max: string; surface_min: string; bedrooms_min: string;
+    price_min: string; price_max: string;
+    surface_min: string; surface_max: string;
+    rooms_min: string; bedrooms_min: string;
+    features: string[];
   }) => void;
   className?: string;
   variant?: 'hero' | 'compact';
@@ -31,14 +40,22 @@ export function SearchBar({ onSearch, className, variant = 'hero' }: SearchBarPr
   const [priceMin, setPriceMin] = useState('');
   const [priceMax, setPriceMax] = useState('');
   const [surfaceMin, setSurfaceMin] = useState('');
+  const [surfaceMax, setSurfaceMax] = useState('');
+  const [roomsMin, setRoomsMin] = useState('');
   const [bedroomsMin, setBedroomsMin] = useState('');
+  const [features, setFeatures] = useState<string[]>([]);
 
   const quartiers = useMemo(() => {
     if (!commune) return [];
     return DAKAR_COMMUNES[commune] || [];
   }, [commune]);
 
-  const activeFiltersCount = [priceMin, priceMax, surfaceMin, bedroomsMin].filter(Boolean).length;
+  const activeFiltersCount =
+    [priceMin, priceMax, surfaceMin, surfaceMax, roomsMin, bedroomsMin].filter(Boolean).length + features.length;
+
+  const toggleFeature = (f: string) => {
+    setFeatures((arr) => (arr.includes(f) ? arr.filter((x) => x !== f) : [...arr, f]));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +68,10 @@ export function SearchBar({ onSearch, className, variant = 'hero' }: SearchBarPr
       price_min: priceMin,
       price_max: priceMax,
       surface_min: surfaceMin,
+      surface_max: surfaceMax,
+      rooms_min: roomsMin,
       bedrooms_min: bedroomsMin,
+      features,
     };
     if (onSearch) {
       onSearch(filters);
@@ -64,7 +84,10 @@ export function SearchBar({ onSearch, className, variant = 'hero' }: SearchBarPr
         price_min: priceMin,
         price_max: priceMax,
         surface_min: surfaceMin,
+        surface_max: surfaceMax,
+        rooms_min: roomsMin,
         bedrooms_min: bedroomsMin,
+        features: features.join(','),
       });
     }
   };
@@ -75,7 +98,10 @@ export function SearchBar({ onSearch, className, variant = 'hero' }: SearchBarPr
   };
 
   const resetFilters = () => {
-    setPriceMin(''); setPriceMax(''); setSurfaceMin(''); setBedroomsMin('');
+    setPriceMin(''); setPriceMax('');
+    setSurfaceMin(''); setSurfaceMax('');
+    setRoomsMin(''); setBedroomsMin('');
+    setFeatures([]);
   };
 
   const selectClass = 'w-full appearance-none rounded-xl border border-slate-200 px-4 py-3.5 pr-10 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer';
@@ -254,68 +280,83 @@ export function SearchBar({ onSearch, className, variant = 'hero' }: SearchBarPr
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {/* Prix min */}
             <div>
               <label className="flex items-center gap-1.5 text-xs font-medium text-slate-500 mb-1.5">
                 <Banknote size={12} /> Budget min (XOF)
               </label>
-              <input
-                type="number"
-                placeholder="Ex: 100 000"
-                value={priceMin}
-                onChange={(e) => setPriceMin(e.target.value)}
-                className={inputClass}
-              />
+              <input type="number" placeholder="Ex: 100 000" value={priceMin}
+                onChange={(e) => setPriceMin(e.target.value)} className={inputClass} />
             </div>
-
-            {/* Prix max */}
             <div>
               <label className="flex items-center gap-1.5 text-xs font-medium text-slate-500 mb-1.5">
                 <Banknote size={12} /> Budget max (XOF)
               </label>
-              <input
-                type="number"
-                placeholder="Ex: 50 000 000"
-                value={priceMax}
-                onChange={(e) => setPriceMax(e.target.value)}
-                className={inputClass}
-              />
+              <input type="number" placeholder="Ex: 50 000 000" value={priceMax}
+                onChange={(e) => setPriceMax(e.target.value)} className={inputClass} />
             </div>
-
-            {/* Surface min */}
             <div>
               <label className="flex items-center gap-1.5 text-xs font-medium text-slate-500 mb-1.5">
-                <Maximize size={12} /> Surface min (m2)
+                <Maximize size={12} /> Surface min (m²)
               </label>
-              <input
-                type="number"
-                placeholder="Ex: 50"
-                value={surfaceMin}
-                onChange={(e) => setSurfaceMin(e.target.value)}
-                className={inputClass}
-              />
+              <input type="number" placeholder="Ex: 50" value={surfaceMin}
+                onChange={(e) => setSurfaceMin(e.target.value)} className={inputClass} />
             </div>
-
-            {/* Chambres min */}
+            <div>
+              <label className="flex items-center gap-1.5 text-xs font-medium text-slate-500 mb-1.5">
+                <Maximize size={12} /> Surface max (m²)
+              </label>
+              <input type="number" placeholder="Ex: 200" value={surfaceMax}
+                onChange={(e) => setSurfaceMax(e.target.value)} className={inputClass} />
+            </div>
+            <div>
+              <label className="flex items-center gap-1.5 text-xs font-medium text-slate-500 mb-1.5">
+                <HomeIcon size={12} /> Pièces min
+              </label>
+              <div className="relative">
+                <select value={roomsMin} onChange={(e) => setRoomsMin(e.target.value)}
+                  className={cn(inputClass, 'appearance-none pr-8')}>
+                  <option value="">Peu importe</option>
+                  <option value="1">1+</option><option value="2">2+</option>
+                  <option value="3">3+</option><option value="4">4+</option>
+                  <option value="5">5+</option>
+                </select>
+                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              </div>
+            </div>
             <div>
               <label className="flex items-center gap-1.5 text-xs font-medium text-slate-500 mb-1.5">
                 <BedDouble size={12} /> Chambres min
               </label>
               <div className="relative">
-                <select
-                  value={bedroomsMin}
-                  onChange={(e) => setBedroomsMin(e.target.value)}
-                  className={cn(inputClass, 'appearance-none pr-8')}
-                >
+                <select value={bedroomsMin} onChange={(e) => setBedroomsMin(e.target.value)}
+                  className={cn(inputClass, 'appearance-none pr-8')}>
                   <option value="">Peu importe</option>
-                  <option value="1">1+</option>
-                  <option value="2">2+</option>
-                  <option value="3">3+</option>
-                  <option value="4">4+</option>
+                  <option value="1">1+</option><option value="2">2+</option>
+                  <option value="3">3+</option><option value="4">4+</option>
                   <option value="5">5+</option>
                 </select>
                 <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
               </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-2">Équipements</label>
+            <div className="flex flex-wrap gap-2">
+              {FEATURE_OPTIONS.map((f) => {
+                const active = features.includes(f);
+                return (
+                  <button key={f} type="button" onClick={() => toggleFeature(f)}
+                    className={cn(
+                      'px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors',
+                      active
+                        ? 'border-orange-500 bg-orange-50 text-orange-600'
+                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300',
+                    )}>
+                    {f}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
