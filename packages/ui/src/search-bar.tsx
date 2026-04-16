@@ -20,10 +20,17 @@ interface SearchBarProps {
     surface_min: string; surface_max: string;
     rooms_min: string; bedrooms_min: string;
     features: string[];
+    availability: string;
   }) => void;
   className?: string;
   variant?: 'hero' | 'compact';
 }
+
+const AVAILABILITY_OPTIONS = [
+  { value: '', label: 'Toutes' },
+  { value: 'immediate', label: 'Immédiate' },
+  { value: 'future', label: 'À venir' },
+];
 
 function buildSearchUrl(params: Record<string, string>) {
   const url = new URLSearchParams();
@@ -44,6 +51,7 @@ export function SearchBar({ onSearch, className, variant = 'hero' }: SearchBarPr
   const [roomsMin, setRoomsMin] = useState('');
   const [bedroomsMin, setBedroomsMin] = useState('');
   const [features, setFeatures] = useState<string[]>([]);
+  const [availability, setAvailability] = useState('');
 
   const quartiers = useMemo(() => {
     if (!commune) return [];
@@ -51,7 +59,7 @@ export function SearchBar({ onSearch, className, variant = 'hero' }: SearchBarPr
   }, [commune]);
 
   const activeFiltersCount =
-    [priceMin, priceMax, surfaceMin, surfaceMax, roomsMin, bedroomsMin].filter(Boolean).length + features.length;
+    [priceMin, priceMax, surfaceMin, surfaceMax, roomsMin, bedroomsMin, availability].filter(Boolean).length + features.length;
 
   const toggleFeature = (f: string) => {
     setFeatures((arr) => (arr.includes(f) ? arr.filter((x) => x !== f) : [...arr, f]));
@@ -72,6 +80,7 @@ export function SearchBar({ onSearch, className, variant = 'hero' }: SearchBarPr
       rooms_min: roomsMin,
       bedrooms_min: bedroomsMin,
       features,
+      availability,
     };
     if (onSearch) {
       onSearch(filters);
@@ -88,6 +97,7 @@ export function SearchBar({ onSearch, className, variant = 'hero' }: SearchBarPr
         rooms_min: roomsMin,
         bedrooms_min: bedroomsMin,
         features: features.join(','),
+        availability,
       });
     }
   };
@@ -102,6 +112,7 @@ export function SearchBar({ onSearch, className, variant = 'hero' }: SearchBarPr
     setSurfaceMin(''); setSurfaceMax('');
     setRoomsMin(''); setBedroomsMin('');
     setFeatures([]);
+    setAvailability('');
   };
 
   const selectClass = 'w-full appearance-none rounded-xl border border-slate-200 px-4 py-3.5 pr-10 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer';
@@ -354,6 +365,26 @@ export function SearchBar({ onSearch, className, variant = 'hero' }: SearchBarPr
                         : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300',
                     )}>
                     {f}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-2">Disponibilité</label>
+            <div className="flex flex-wrap gap-2">
+              {AVAILABILITY_OPTIONS.map(({ value, label }) => {
+                const active = availability === value;
+                return (
+                  <button key={value} type="button" onClick={() => setAvailability(value)}
+                    className={cn(
+                      'px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors',
+                      active
+                        ? 'border-orange-500 bg-orange-50 text-orange-600'
+                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300',
+                    )}>
+                    {label}
                   </button>
                 );
               })}

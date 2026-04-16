@@ -46,6 +46,7 @@ function SearchPageContent() {
     roomsMin: searchParams.get('rooms_min') || '',
     bedroomsMin: searchParams.get('bedrooms_min') || '',
     features: (searchParams.get('features') || '').split(',').filter(Boolean),
+    availability: searchParams.get('availability') || '',
   });
 
   // Re-sync filters when URL params change
@@ -62,6 +63,7 @@ function SearchPageContent() {
       roomsMin: searchParams.get('rooms_min') || '',
       bedroomsMin: searchParams.get('bedrooms_min') || '',
       features: (searchParams.get('features') || '').split(',').filter(Boolean),
+      availability: searchParams.get('availability') || '',
     });
     setPage(1);
   }, [searchParams]);
@@ -85,6 +87,7 @@ function SearchPageContent() {
     if (filters.roomsMin) query = query.gte('rooms', Number(filters.roomsMin));
     if (filters.bedroomsMin) query = query.gte('bedrooms', Number(filters.bedroomsMin));
     if (filters.features.length > 0) query = query.contains('features', filters.features);
+    if (filters.availability) query = query.eq('availability', filters.availability);
 
     const sortMap: Record<string, [string, { ascending: boolean }]> = {
       price_asc: ['price', { ascending: true }],
@@ -237,8 +240,24 @@ function SearchPageContent() {
             </div>
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Disponibilité</label>
+            <div className="flex flex-wrap gap-2">
+              {[{ v: '', l: 'Toutes' }, { v: 'immediate', l: 'Immédiate' }, { v: 'future', l: 'À venir' }].map(({ v, l }) => {
+                const active = filters.availability === v;
+                return (
+                  <button key={v} type="button"
+                    onClick={() => setFilters(prev => ({ ...prev, availability: v }))}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${active ? 'border-orange-500 bg-orange-50 text-orange-600' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}`}>
+                    {l}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="flex justify-end gap-3">
-            <Button variant="ghost" size="sm" onClick={() => { setFilters({ propertyType: '', transactionType: '', city: '', district: '', priceMin: '', priceMax: '', surfaceMin: '', surfaceMax: '', roomsMin: '', bedroomsMin: '', features: [] }); setPage(1); }}>Réinitialiser</Button>
+            <Button variant="ghost" size="sm" onClick={() => { setFilters({ propertyType: '', transactionType: '', city: '', district: '', priceMin: '', priceMax: '', surfaceMin: '', surfaceMax: '', roomsMin: '', bedroomsMin: '', features: [], availability: '' }); setPage(1); }}>Réinitialiser</Button>
             <Button variant="primary" size="sm" onClick={() => { setPage(1); fetchProperties(); }}>Appliquer</Button>
           </div>
         </div>
@@ -252,7 +271,7 @@ function SearchPageContent() {
       ) : properties.length === 0 ? (
         <div className="text-center py-20">
           <p className="text-lg text-slate-500">Aucun bien trouve pour ces criteres.</p>
-          <Button variant="outline" className="mt-4" onClick={() => { setFilters({ propertyType: '', transactionType: '', city: '', district: '', priceMin: '', priceMax: '', surfaceMin: '', surfaceMax: '', roomsMin: '', bedroomsMin: '', features: [] }); setPage(1); }}>
+          <Button variant="outline" className="mt-4" onClick={() => { setFilters({ propertyType: '', transactionType: '', city: '', district: '', priceMin: '', priceMax: '', surfaceMin: '', surfaceMax: '', roomsMin: '', bedroomsMin: '', features: [], availability: '' }); setPage(1); }}>
             Réinitialiser les filtres
           </Button>
         </div>
