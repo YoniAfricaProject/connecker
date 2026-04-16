@@ -3,12 +3,14 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Heart, User, Building2, Plus, ArrowLeft } from 'lucide-react';
+import { Heart, User, Building2, Plus, ArrowLeft, MessageCircle, Bell } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { Button, Logo } from '@connecker/ui';
 
 const NAV = [
   { href: '/dashboard/profile', icon: User, label: 'Mon profil' },
+  { href: '/dashboard/messages', icon: MessageCircle, label: 'Messages' },
+  { href: '/dashboard/notifications', icon: Bell, label: 'Notifications' },
   { href: '/dashboard/favorites', icon: Heart, label: 'Mes favoris' },
   { href: '/dashboard/properties', icon: Building2, label: 'Mes annonces' },
 ];

@@ -26,6 +26,9 @@ export function Header() {
             <Link href="/search?type=rent" className="text-sm font-medium text-slate-600 hover:text-orange-600 transition-colors">
               Louer
             </Link>
+            <Link href="/estimate" className="text-sm font-medium text-slate-600 hover:text-orange-600 transition-colors">
+              Estimer
+            </Link>
             <Link href="/services" className="text-sm font-medium text-slate-600 hover:text-orange-600 transition-colors">
               Services
             </Link>
@@ -110,6 +113,9 @@ export function Header() {
             </Link>
             <Link href="/search?type=rent" className="block px-4 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-orange-50 hover:text-orange-600">
               Louer
+            </Link>
+            <Link href="/estimate" className="block px-4 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-orange-50 hover:text-orange-600">
+              Estimer
             </Link>
             <Link href="/services" className="block px-4 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-orange-50 hover:text-orange-600">
               Services

@@ -3,6 +3,7 @@ import { ArrowRight, Shield, Search, Users, TrendingUp, Building2, MapPin } from
 import { PropertyCard, SearchBar, Button, Badge } from '@connecker/ui';
 import { getSupabaseServer } from '@/lib/supabase-server';
 import { POPULAR_CITIES, PROPERTY_TYPES } from '@/lib/mock-data';
+import { OnboardingGate } from '@/components/onboarding-gate';
 
 async function getFeaturedProperties() {
   const supabase = getSupabaseServer();
@@ -65,6 +66,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <OnboardingGate />
       {/* Hero Section */}
       <section className="relative min-h-[85vh] flex items-center">
         <div className="absolute inset-0 z-0">
