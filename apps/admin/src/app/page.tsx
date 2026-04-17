@@ -194,53 +194,53 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">Dashboard</h1>
-          {isSuperAdmin && <p className="text-xs text-orange-500 flex items-center gap-1 mt-0.5"><Zap size={11} /> Super Admin</p>}
+          <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+          {isSuperAdmin && <p className="text-sm text-orange-500 flex items-center gap-1 mt-1"><Zap size={13} /> Super Admin</p>}
         </div>
-        <span className="text-xs text-slate-400">{new Date().toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })}</span>
+        <span className="text-sm text-slate-400">{new Date().toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })}</span>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: 'Annonces', value: stats.properties, icon: Building2, accent: 'border-l-orange-500' },
           { label: 'En attente', value: stats.pending, icon: AlertCircle, accent: 'border-l-amber-400' },
           { label: 'Utilisateurs', value: stats.users, icon: Users, accent: 'border-l-slate-400' },
           { label: 'Leads', value: stats.leads, icon: MessageSquare, accent: 'border-l-slate-300' },
         ].map(({ label, value, icon: Icon, accent }) => (
-          <Card key={label} className={`p-4 border-l-[3px] ${accent}`}>
+          <Card key={label} className={`p-5 sm:p-6 border-l-4 ${accent}`}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xl font-bold text-slate-900">{value}</div>
-                <div className="text-xs text-slate-500">{label}</div>
+                <div className="text-2xl sm:text-3xl font-bold text-slate-900">{value}</div>
+                <div className="text-sm text-slate-500 mt-1">{label}</div>
               </div>
-              <Icon size={16} className="text-slate-300" />
+              <Icon size={24} className="text-slate-300" />
             </div>
           </Card>
         ))}
       </div>
 
       {/* Admin charts - visible to all admins */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Status breakdown */}
-        <Card className="p-5">
-          <h2 className="text-sm font-semibold text-slate-900 mb-4">Annonces par statut</h2>
+        <Card className="p-5 sm:p-6">
+          <h2 className="text-base font-semibold text-slate-900 mb-4">Annonces par statut</h2>
           {adminCharts.statusBreakdown.length > 0 ? (
             <>
               <div className="flex justify-center">
-                <ResponsiveContainer width={140} height={140}>
+                <ResponsiveContainer width="100%" height={180}>
                   <PieChart>
-                    <Pie data={adminCharts.statusBreakdown} cx="50%" cy="50%" innerRadius={45} outerRadius={65} dataKey="value" strokeWidth={2} stroke="#fff">
+                    <Pie data={adminCharts.statusBreakdown} cx="50%" cy="50%" innerRadius={50} outerRadius={75} dataKey="value" strokeWidth={2} stroke="#fff">
                       {adminCharts.statusBreakdown.map((_, i) => <Cell key={i} fill={['#f97316', '#f59e0b', '#94a3b8', '#cbd5e1', '#e2e8f0'][i % 5]} />)}
                     </Pie>
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-              <div className="space-y-2 mt-3">
+              <div className="space-y-2.5 mt-4">
                 {adminCharts.statusBreakdown.map((s, i) => (
-                  <div key={s.name} className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: ['#f97316', '#f59e0b', '#94a3b8', '#cbd5e1', '#e2e8f0'][i % 5] }} />
+                  <div key={s.name} className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: ['#f97316', '#f59e0b', '#94a3b8', '#cbd5e1', '#e2e8f0'][i % 5] }} />
                       <span className="text-slate-600">{s.name}</span>
                     </div>
                     <span className="font-bold text-slate-900">{s.value}</span>
@@ -248,17 +248,17 @@ export default function AdminDashboard() {
                 ))}
               </div>
             </>
-          ) : <p className="text-xs text-slate-400 text-center py-8">Aucune donnee</p>}
+          ) : <p className="text-sm text-slate-400 text-center py-8">Aucune donnee</p>}
         </Card>
 
         {/* Leads 7 days */}
-        <Card className="p-5">
-          <h2 className="text-sm font-semibold text-slate-900 mb-4">Leads - 7 derniers jours</h2>
-          <ResponsiveContainer width="100%" height={200}>
+        <Card className="p-5 sm:p-6">
+          <h2 className="text-base font-semibold text-slate-900 mb-4">Leads - 7 derniers jours</h2>
+          <ResponsiveContainer width="100%" height={220}>
             <BarChart data={adminCharts.leadsDaily} barCategoryGap="25%">
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-              <XAxis dataKey="jour" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} allowDecimals={false} />
+              <XAxis dataKey="jour" tick={{ fontSize: 12, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 12, fill: '#94a3b8' }} axisLine={false} tickLine={false} allowDecimals={false} />
               <Tooltip content={<ChartTooltip />} />
               <Bar dataKey="leads" fill="#f97316" radius={[4, 4, 0, 0]} />
             </BarChart>
@@ -266,8 +266,8 @@ export default function AdminDashboard() {
         </Card>
 
         {/* Top announcers + conversion */}
-        <Card className="p-5">
-          <h2 className="text-sm font-semibold text-slate-900 mb-3">Top annonceurs</h2>
+        <Card className="p-5 sm:p-6">
+          <h2 className="text-base font-semibold text-slate-900 mb-3">Top annonceurs</h2>
           <div className="space-y-2 mb-5">
             {adminCharts.topAnnouncers.map((a, i) => {
               const maxCount = adminCharts.topAnnouncers[0]?.count || 1;
@@ -302,67 +302,67 @@ export default function AdminDashboard() {
       {isSuperAdmin && (
         <>
           {/* Revenue summary */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <Card className="p-4 bg-gradient-to-br from-orange-500 to-orange-600 text-white border-0">
-              <DollarSign size={14} className="mb-1 opacity-70" />
-              <div className="text-xl font-bold">{formatPrice(revenue.total)}</div>
-              <div className="text-xs text-white/60">Revenus totaux</div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Card className="p-5 sm:p-6 bg-gradient-to-br from-orange-500 to-orange-600 text-white border-0">
+              <DollarSign size={20} className="mb-2 opacity-70" />
+              <div className="text-2xl sm:text-3xl font-bold">{formatPrice(revenue.total)}</div>
+              <div className="text-sm text-white/60 mt-1">Revenus totaux</div>
             </Card>
-            <Card className="p-4 bg-gradient-to-br from-slate-700 to-slate-800 text-white border-0">
-              <Percent size={14} className="mb-1 opacity-70" />
-              <div className="text-xl font-bold">{formatPrice(revenue.byType.find(t => t.name === 'Commissions')?.value || 0)}</div>
-              <div className="text-xs text-white/60">Commissions</div>
+            <Card className="p-5 sm:p-6 bg-gradient-to-br from-slate-700 to-slate-800 text-white border-0">
+              <Percent size={20} className="mb-2 opacity-70" />
+              <div className="text-2xl sm:text-3xl font-bold">{formatPrice(revenue.byType.find(t => t.name === 'Commissions')?.value || 0)}</div>
+              <div className="text-sm text-white/60 mt-1">Commissions</div>
             </Card>
-            <Card className="p-4 bg-gradient-to-br from-slate-500 to-slate-600 text-white border-0">
-              <CreditCard size={14} className="mb-1 opacity-70" />
-              <div className="text-xl font-bold">{formatPrice((revenue.byType.find(t => t.name === 'Publicite')?.value || 0) + (revenue.byType.find(t => t.name === 'Abonnements')?.value || 0))}</div>
-              <div className="text-xs text-white/60">Pub & Abo</div>
+            <Card className="p-5 sm:p-6 bg-gradient-to-br from-slate-500 to-slate-600 text-white border-0">
+              <CreditCard size={20} className="mb-2 opacity-70" />
+              <div className="text-2xl sm:text-3xl font-bold">{formatPrice((revenue.byType.find(t => t.name === 'Publicite')?.value || 0) + (revenue.byType.find(t => t.name === 'Abonnements')?.value || 0))}</div>
+              <div className="text-sm text-white/60 mt-1">Pub & Abo</div>
             </Card>
           </div>
 
           {/* Revenue charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-            <Card className="p-5 lg:col-span-3">
-              <h2 className="text-sm font-semibold text-slate-900 mb-5">Revenus mensuels</h2>
-              <ResponsiveContainer width="100%" height={240}>
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+            <Card className="p-5 sm:p-6 lg:col-span-3">
+              <h2 className="text-base font-semibold text-slate-900 mb-5">Revenus mensuels</h2>
+              <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={revenue.monthly} barCategoryGap="30%">
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                  <XAxis dataKey="mois" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={(v) => v >= 1000000 ? `${(v / 1000000).toFixed(1)}M` : v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)} />
+                  <XAxis dataKey="mois" tick={{ fontSize: 12, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={(v) => v >= 1000000 ? `${(v / 1000000).toFixed(1)}M` : v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)} />
                   <Tooltip content={<RevenueTooltip />} />
                   <Bar dataKey="Commissions" stackId="r" fill="#f97316" />
                   <Bar dataKey="Publicite" stackId="r" fill="#94a3b8" />
                   <Bar dataKey="Abonnements" stackId="r" fill="#e2e8f0" radius={[3, 3, 0, 0]} />
-                  <Legend iconSize={8} wrapperStyle={{ fontSize: 10 }} />
+                  <Legend iconSize={10} wrapperStyle={{ fontSize: 12 }} />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
 
-            <Card className="p-5 lg:col-span-2">
-              <h2 className="text-sm font-semibold text-slate-900 mb-3">Repartition</h2>
+            <Card className="p-5 sm:p-6 lg:col-span-2">
+              <h2 className="text-base font-semibold text-slate-900 mb-3">Répartition</h2>
               <div className="flex justify-center">
-                <ResponsiveContainer width={140} height={140}>
+                <ResponsiveContainer width="100%" height={180}>
                   <PieChart>
-                    <Pie data={revenue.byType} cx="50%" cy="50%" innerRadius={45} outerRadius={65} dataKey="value" strokeWidth={2} stroke="#fff">
+                    <Pie data={revenue.byType} cx="50%" cy="50%" innerRadius={50} outerRadius={75} dataKey="value" strokeWidth={2} stroke="#fff">
                       {revenue.byType.map((_, i) => <Cell key={i} fill={REVENUE_COLORS[i]} />)}
                     </Pie>
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-              <div className="space-y-2 mt-2">
+              <div className="space-y-2.5 mt-3">
                 {revenue.byType.map((t, i) => {
                   const pct = revenue.total > 0 ? Math.round((t.value / revenue.total) * 100) : 0;
                   return (
                     <div key={t.name} className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: REVENUE_COLORS[i] }} />
-                        <span className="text-xs text-slate-600">{t.name}</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: REVENUE_COLORS[i] }} />
+                        <span className="text-sm text-slate-600">{t.name}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="w-16 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                        <div className="w-20 h-2 rounded-full bg-slate-100 overflow-hidden">
                           <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: REVENUE_COLORS[i] }} />
                         </div>
-                        <span className="text-xs font-bold text-slate-700 w-7 text-right">{pct}%</span>
+                        <span className="text-sm font-bold text-slate-700 w-8 text-right">{pct}%</span>
                       </div>
                     </div>
                   );
@@ -385,21 +385,21 @@ export default function AdminDashboard() {
           </div>
 
           {/* Traffic */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
               { label: "Aujourd'hui", value: traffic.todayViews, accent: 'border-l-orange-500' },
               { label: 'Cette semaine', value: traffic.weekViews, accent: 'border-l-amber-400' },
               { label: '30 jours', value: stats.totalViews, accent: 'border-l-slate-400' },
             ].map(({ label, value, accent }) => (
-              <Card key={label} className={`p-3 border-l-[3px] ${accent}`}>
-                <div className="text-xs text-slate-500 uppercase tracking-wider">{label}</div>
-                <div className="text-xl font-bold text-slate-900">{value}</div>
+              <Card key={label} className={`p-5 border-l-4 ${accent}`}>
+                <div className="text-sm text-slate-500 uppercase tracking-wider">{label}</div>
+                <div className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">{value}</div>
               </Card>
             ))}
           </div>
 
-          <Card className="p-5">
-            <h2 className="text-sm font-semibold text-slate-900 mb-4">Trafic - 30 jours</h2>
+          <Card className="p-5 sm:p-6">
+            <h2 className="text-base font-semibold text-slate-900 mb-4">Trafic - 30 jours</h2>
             <ResponsiveContainer width="100%" height={240}>
               <AreaChart data={traffic.daily}>
                 <defs>
