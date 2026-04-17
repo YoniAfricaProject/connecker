@@ -51,7 +51,7 @@ export default function UsersPage() {
           ))}
         </div>
       </div>
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden overflow-x-auto">
         <table className="w-full">
           <thead className="bg-slate-50 border-b"><tr>
             <th className="text-left text-[10px] font-medium text-slate-500 uppercase px-4 py-2">Utilisateur</th>

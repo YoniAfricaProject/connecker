@@ -1,9 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Building2, Users, MessageSquare, Settings, Shield, LogOut, Briefcase, Megaphone, AlertTriangle, Bell, FileText, Handshake } from 'lucide-react';
+import { LayoutDashboard, Building2, Users, MessageSquare, Settings, Shield, LogOut, Briefcase, Megaphone, AlertTriangle, Bell, FileText, Handshake, Menu, X } from 'lucide-react';
 import { Logo, cn } from '@connecker/ui';
 import { useAdminAuth } from '@/lib/auth-context';
 
@@ -21,18 +21,30 @@ const NAV = [
   { href: '/settings', icon: Settings, label: 'Parametres' },
 ];
 
+export function MobileMenuButton() {
+  return null;
+}
+
 export function AdminSidebar() {
   const pathname = usePathname();
   const { user, signOut } = useAdminAuth();
+  const [open, setOpen] = useState(false);
 
-  return (
-    <aside className="fixed inset-y-0 left-0 w-56 bg-slate-900 text-white flex flex-col z-40">
-      <div className="p-5 border-b border-slate-800">
-        <Logo light />
-        <div className="mt-1.5 flex items-center gap-1.5">
-          <Shield size={10} className="text-orange-400" />
-          <span className="text-[10px] text-slate-400 font-medium">Administration</span>
+  useEffect(() => { setOpen(false); }, [pathname]);
+
+  const sidebarContent = (
+    <>
+      <div className="p-5 border-b border-slate-800 flex items-center justify-between">
+        <div>
+          <Logo light />
+          <div className="mt-1.5 flex items-center gap-1.5">
+            <Shield size={10} className="text-orange-400" />
+            <span className="text-[10px] text-slate-400 font-medium">Administration</span>
+          </div>
         </div>
+        <button onClick={() => setOpen(false)} className="lg:hidden p-1 text-slate-400 hover:text-white">
+          <X size={20} />
+        </button>
       </div>
 
       <nav className="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto">
@@ -66,6 +78,36 @@ export function AdminSidebar() {
           </button>
         </div>
       )}
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile header bar */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-4 h-14">
+        <button onClick={() => setOpen(true)} className="text-white p-1">
+          <Menu size={22} />
+        </button>
+        <div className="flex items-center gap-1.5">
+          <Logo light />
+          <Shield size={10} className="text-orange-400" />
+        </div>
+        <div className="w-8" />
+      </div>
+
+      {/* Mobile overlay */}
+      {open && (
+        <div className="lg:hidden fixed inset-0 bg-black/50 z-50" onClick={() => setOpen(false)}>
+          <aside className="fixed inset-y-0 left-0 w-64 bg-slate-900 text-white flex flex-col z-50" onClick={(e) => e.stopPropagation()}>
+            {sidebarContent}
+          </aside>
+        </div>
+      )}
+
+      {/* Desktop sidebar */}
+      <aside className="hidden lg:flex fixed inset-y-0 left-0 w-56 bg-slate-900 text-white flex-col z-40">
+        {sidebarContent}
+      </aside>
+    </>
   );
 }

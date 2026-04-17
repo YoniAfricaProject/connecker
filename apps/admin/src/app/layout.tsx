@@ -19,7 +19,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <AdminAuthProvider>
           <LoginGate>
             <AdminSidebar />
-            <main className="ml-56 min-h-screen p-6">{children}</main>
+            <main className="pt-14 lg:pt-0 lg:ml-56 min-h-screen p-4 md:p-6">{children}</main>
           </LoginGate>
         </AdminAuthProvider>
       </body>

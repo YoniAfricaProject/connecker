@@ -54,7 +54,7 @@ export default function JobsPage() {
       {showForm && (
         <Card className="p-5 space-y-3">
           <h2 className="text-sm font-semibold">{editId ? 'Modifier' : 'Nouvelle'} offre</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <input placeholder="Titre du poste *" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} className="px-3 py-2 rounded-lg border text-xs" />
             <input placeholder="Entreprise *" value={form.company} onChange={e => setForm({ ...form, company: e.target.value })} className="px-3 py-2 rounded-lg border text-xs" />
             <input placeholder="Ville *" value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} className="px-3 py-2 rounded-lg border text-xs" />

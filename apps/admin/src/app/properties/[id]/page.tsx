@@ -103,7 +103,7 @@ export default function AdminPropertyDetailPage() {
             <div className="flex items-center gap-2 text-slate-500"><MapPin size={16} className="text-orange-500" />{property.district}, {property.city}</div>
             <div className="text-2xl font-bold text-orange-600">{formatPrice(property.price, property.currency)}{property.transaction_type === 'rent' ? '/mois' : ''}</div>
 
-            <div className="grid grid-cols-4 gap-3 pt-3 border-t border-slate-100">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 pt-3 border-t border-slate-100">
               <div className="text-center"><div className="text-sm font-bold text-slate-900">{property.surface_area ? formatSurface(property.surface_area) : '-'}</div><div className="text-xs text-slate-400">Surface</div></div>
               <div className="text-center"><div className="text-sm font-bold text-slate-900">{property.bedrooms ?? '-'}</div><div className="text-xs text-slate-400">Chambres</div></div>
               <div className="text-center"><div className="text-sm font-bold text-slate-900">{property.bathrooms ?? '-'}</div><div className="text-xs text-slate-400">SdB</div></div>

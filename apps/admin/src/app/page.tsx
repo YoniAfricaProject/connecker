@@ -302,7 +302,7 @@ export default function AdminDashboard() {
       {isSuperAdmin && (
         <>
           {/* Revenue summary */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <Card className="p-4 bg-gradient-to-br from-orange-500 to-orange-600 text-white border-0">
               <DollarSign size={14} className="mb-1 opacity-70" />
               <div className="text-xl font-bold">{formatPrice(revenue.total)}</div>
@@ -385,7 +385,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Traffic */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {[
               { label: "Aujourd'hui", value: traffic.todayViews, accent: 'border-l-orange-500' },
               { label: 'Cette semaine', value: traffic.weekViews, accent: 'border-l-amber-400' },

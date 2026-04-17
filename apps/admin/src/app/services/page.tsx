@@ -65,7 +65,7 @@ export default function ServicesPage() {
       {showForm && (
         <Card className="p-5 space-y-3">
           <h2 className="text-sm font-semibold">{editId ? 'Modifier' : 'Nouveau'} service</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <input placeholder="Nom *" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="px-3 py-2 rounded-lg border text-xs" />
             <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} className="px-3 py-2 rounded-lg border text-xs">
               {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
@@ -83,7 +83,7 @@ export default function ServicesPage() {
         </Card>
       )}
 
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden overflow-x-auto">
         <table className="w-full">
           <thead className="bg-slate-50 border-b"><tr>
             <th className="text-left text-[10px] font-medium text-slate-500 uppercase px-4 py-2">Nom</th>

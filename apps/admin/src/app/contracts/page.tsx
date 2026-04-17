@@ -57,7 +57,7 @@ export default function ContractsPage() {
       {showForm && (
         <Card className="p-5 space-y-3">
           <h2 className="text-sm font-semibold">Nouveau contrat</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <input placeholder="Nom du client *" value={form.client_name} onChange={e => setForm({ ...form, client_name: e.target.value })} className="px-3 py-2 rounded-lg border text-xs" />
             <select value={form.pack} onChange={e => setForm({ ...form, pack: e.target.value })} className="px-3 py-2 rounded-lg border text-xs">
               {PACKS.map(p => <option key={p} value={p}>{p}</option>)}
@@ -76,7 +76,7 @@ export default function ContractsPage() {
         </Card>
       )}
 
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden overflow-x-auto">
         <table className="w-full">
           <thead className="bg-slate-50 border-b"><tr>
             <th className="text-left text-[10px] font-medium text-slate-500 uppercase px-4 py-2">Client</th>

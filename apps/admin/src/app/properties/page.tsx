@@ -86,7 +86,7 @@ export default function AdminPropertiesPage() {
       {loading ? (
         <div className="flex justify-center py-12"><Loader2 size={24} className="animate-spin text-orange-500" /></div>
       ) : (
-        <Card className="overflow-hidden">
+        <Card className="overflow-hidden overflow-x-auto">
           <table className="w-full">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>

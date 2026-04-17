@@ -63,7 +63,7 @@ export default function NotificationsPage() {
       {showForm && (
         <Card className="p-5 space-y-3">
           <h2 className="text-sm font-semibold">Nouvelle notification</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <select value={form.user_id} onChange={e => setForm({ ...form, user_id: e.target.value })} className="px-3 py-2 rounded-lg border text-xs">
               <option value="">Selectionnez un destinataire</option>
               <option value="all">Tous les utilisateurs ({users.length})</option>

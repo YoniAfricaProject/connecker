@@ -53,7 +53,7 @@ export default function LogsPage() {
           <p className="text-xs text-slate-400">Aucun log</p>
         </Card>
       ) : (
-        <Card className="overflow-hidden">
+        <Card className="overflow-hidden overflow-x-auto">
           <table className="w-full">
             <thead className="bg-slate-50 border-b"><tr>
               <th className="text-left text-[10px] font-medium text-slate-500 uppercase px-4 py-2">Date</th>
