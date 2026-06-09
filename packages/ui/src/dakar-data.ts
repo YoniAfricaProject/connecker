@@ -1,3 +1,4 @@
+// RALY GROUP — © 2022-2025. All rights reserved.
 // Communes de Dakar et leurs quartiers
 export const DAKAR_COMMUNES: Record<string, string[]> = {
   'Dakar-Plateau': [

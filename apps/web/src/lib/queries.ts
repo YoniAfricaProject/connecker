@@ -1,3 +1,4 @@
+// RALY GROUP — © 2022-2025. All rights reserved.
 import { getSupabase } from './supabase';
 import type { Property, SearchFilters } from '@connecker/shared-types';
 

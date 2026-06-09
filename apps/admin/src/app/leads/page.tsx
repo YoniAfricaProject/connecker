@@ -1,4 +1,5 @@
 'use client';
+// RALY GROUP — © 2022-2025. All rights reserved.
 
 import React, { useEffect, useState } from 'react';
 import { Search, Mail, Phone, Clock, Loader2 } from 'lucide-react';

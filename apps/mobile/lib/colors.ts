@@ -1,3 +1,4 @@
+// RALY GROUP — © 2022-2025. All rights reserved.
 export const Colors = {
   orange: '#f97316',
   orangeLight: '#fed7aa',

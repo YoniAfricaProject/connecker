@@ -1,3 +1,4 @@
+// RALY GROUP — © 2022-2025. All rights reserved.
 import type { MetadataRoute } from 'next';
 import { createClient } from '@supabase/supabase-js';
 

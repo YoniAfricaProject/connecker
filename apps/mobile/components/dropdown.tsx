@@ -1,3 +1,4 @@
+// RALY GROUP — © 2022-2025. All rights reserved.
 import { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';

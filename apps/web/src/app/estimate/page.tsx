@@ -1,4 +1,5 @@
 'use client';
+// RALY GROUP — © 2022-2025. All rights reserved.
 
 import { useState } from 'react';
 import Link from 'next/link';

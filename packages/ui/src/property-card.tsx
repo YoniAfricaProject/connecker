@@ -1,4 +1,5 @@
 'use client';
+// RALY GROUP — © 2022-2025. All rights reserved.
 
 import React from 'react';
 import { Heart, MapPin, BedDouble, Bath, Maximize } from 'lucide-react';

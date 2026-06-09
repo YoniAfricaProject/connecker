@@ -1,3 +1,4 @@
+// RALY GROUP — © 2022-2025. All rights reserved.
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {

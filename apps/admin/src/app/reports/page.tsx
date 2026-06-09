@@ -1,4 +1,5 @@
 'use client';
+// RALY GROUP — © 2022-2025. All rights reserved.
 
 import React, { useEffect, useState } from 'react';
 import { AlertTriangle, Loader2, CheckCircle, Eye, Trash2 } from 'lucide-react';

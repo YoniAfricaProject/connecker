@@ -1,3 +1,4 @@
+// RALY GROUP — © 2022-2025. All rights reserved.
 import Link from 'next/link';
 import { Home, Search, ArrowLeft } from 'lucide-react';
 import { Button, Logo } from '@connecker/ui';

@@ -1,3 +1,4 @@
+// RALY GROUP — © 2022-2025. All rights reserved.
 import React from 'react';
 import Link from 'next/link';
 import { Logo } from '@connecker/ui';

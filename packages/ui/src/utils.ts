@@ -1,3 +1,4 @@
+// RALY GROUP — © 2022-2025. All rights reserved.
 import { clsx, type ClassValue } from 'clsx';
 
 export function cn(...inputs: ClassValue[]) {

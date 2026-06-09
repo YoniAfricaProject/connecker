@@ -1,3 +1,4 @@
+// RALY GROUP — © 2022-2025. All rights reserved.
 import { getSupabase } from './supabase';
 
 export async function getUserFavorites(userId: string): Promise<string[]> {

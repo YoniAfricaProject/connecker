@@ -1,3 +1,4 @@
+// RALY GROUP — © 2022-2025. All rights reserved.
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const PREFIX = 'cache:';

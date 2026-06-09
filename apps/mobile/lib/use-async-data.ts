@@ -1,3 +1,4 @@
+// RALY GROUP — © 2022-2025. All rights reserved.
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 export type AsyncState<T> = {

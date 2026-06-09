@@ -1,4 +1,5 @@
 'use client';
+// RALY GROUP — © 2022-2025. All rights reserved.
 
 import React, { useState, useEffect } from 'react';
 import { Phone, Mail, MapPin, Clock, Send, Loader2, CheckCircle, MessageCircle } from 'lucide-react';

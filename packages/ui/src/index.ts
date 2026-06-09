@@ -1,3 +1,4 @@
+// RALY GROUP — © 2022-2025. All rights reserved.
 export { Button } from './button';
 export { Input } from './input';
 export { Badge } from './badge';

@@ -1,3 +1,4 @@
+// RALY GROUP — © 2022-2025. All rights reserved.
 import Link from 'next/link';
 import { ArrowRight, Shield, Search, Users, TrendingUp, Building2, MapPin } from 'lucide-react';
 import { PropertyCard, SearchBar, Button, Badge } from '@connecker/ui';

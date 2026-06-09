@@ -1,4 +1,5 @@
 'use client';
+// RALY GROUP — © 2022-2025. All rights reserved.
 
 import React, { useEffect, useState } from 'react';
 import { Bell, Send, Loader2, Trash2, Plus } from 'lucide-react';

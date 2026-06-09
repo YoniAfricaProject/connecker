@@ -1,3 +1,4 @@
+// RALY GROUP — © 2022-2025. All rights reserved.
 export const VILLES = ['Dakar', 'Saint-Louis', 'Thies', 'Mbour', 'Saly', 'Kaolack', 'Ziguinchor', 'Touba', 'Tambacounda', 'Rufisque', 'Diamniadio'];
 
 export const DAKAR_COMMUNES: Record<string, string[]> = {

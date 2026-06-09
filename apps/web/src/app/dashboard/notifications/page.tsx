@@ -1,4 +1,5 @@
 'use client';
+// RALY GROUP — © 2022-2025. All rights reserved.
 
 import { useCallback, useEffect, useState } from 'react';
 import { Loader2, Bell, RefreshCw } from 'lucide-react';

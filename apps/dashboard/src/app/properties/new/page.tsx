@@ -1,4 +1,5 @@
 'use client';
+// RALY GROUP — © 2022-2025. All rights reserved.
 
 import React, { useState } from 'react';
 import { Upload, X, ArrowLeft, Save, Eye } from 'lucide-react';

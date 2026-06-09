@@ -1,4 +1,5 @@
 'use client';
+// RALY GROUP — © 2022-2025. All rights reserved.
 
 import React, { useState, useMemo } from 'react';
 import { Search, MapPin, SlidersHorizontal, Building2, ChevronDown, X, BedDouble, Maximize, Banknote, Home as HomeIcon } from 'lucide-react';

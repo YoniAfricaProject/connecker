@@ -1,3 +1,4 @@
+// RALY GROUP — © 2022-2025. All rights reserved.
 import type { Property } from '@connecker/shared-types';
 
 export const FEATURED_PROPERTIES: Property[] = [

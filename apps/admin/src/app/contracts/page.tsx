@@ -1,4 +1,5 @@
 'use client';
+// RALY GROUP — © 2022-2025. All rights reserved.
 
 import React, { useEffect, useState } from 'react';
 import { Plus, Loader2, Trash2, Edit } from 'lucide-react';

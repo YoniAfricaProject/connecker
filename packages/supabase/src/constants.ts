@@ -1,3 +1,4 @@
+// RALY GROUP — © 2022-2025. All rights reserved.
 export const TABLES = {
   users: 'users',
   properties: 'properties',

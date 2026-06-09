@@ -1,4 +1,5 @@
 'use client';
+// RALY GROUP — © 2022-2025. All rights reserved.
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { getSupabase } from './supabase';

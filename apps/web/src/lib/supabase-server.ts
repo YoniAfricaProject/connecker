@@ -1,3 +1,4 @@
+// RALY GROUP — © 2022-2025. All rights reserved.
 import { createClient } from '@supabase/supabase-js';
 
 export function getSupabaseServer() {

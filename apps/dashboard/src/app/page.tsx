@@ -1,3 +1,4 @@
+// RALY GROUP — © 2022-2025. All rights reserved.
 import { Building2, Eye, MessageSquare, TrendingUp, Plus, ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
 import { Button, Card } from '@connecker/ui';

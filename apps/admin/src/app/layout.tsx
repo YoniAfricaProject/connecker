@@ -1,3 +1,4 @@
+// RALY GROUP — © 2022-2025. All rights reserved.
 import type { Metadata } from 'next';
 import { Jost } from 'next/font/google';
 import './globals.css';
